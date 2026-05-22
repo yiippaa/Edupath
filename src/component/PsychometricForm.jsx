@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // IMPORT FETCH OTOMATIS & LOADING PAGE
-import { fetchWithAuth } from '../utils/auth';
+import { fetchWithAuth } from '../Utils/auth';
 import LoadingPage from './LoadingPage';
 
 function PsychometricForm({ onBack, academicData, onSubmitSuccess, onProfileClick }) { 

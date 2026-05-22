@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer 
 } from 'recharts';
-import { fetchWithAuth } from '../utils/auth';
+import { fetchWithAuth } from '../Utils/auth';
 
 function ResultPage({ onRetry, onBack, resultData, academicData, behavioralData }) {
   const finalData = resultData?.data || resultData;

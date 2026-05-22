@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchWithAuth, handleLogout as backendLogout } from '../utils/auth';
+import { fetchWithAuth, handleLogout as backendLogout } from '../Utils/auth';
 
 function UserProfilePage({ onBack, onLogout }) {
   const [profileData, setProfileData] = useState(null);
