@@ -112,7 +112,7 @@ function LandingPage({
         {/* Hero Section */}
         <section className="max-w-container-max mx-auto px-gutter py-12 lg:py-24 flex flex-col lg:flex-row items-center gap-16">
           <div className="flex-1 space-y-8">
-            <h1 className="font-display text-[48px] font-extrabold text-text-primary leading-[1.2] tracking-tight">
+            <h1 className="font-display text-[40px] lg:text-[48px] font-extrabold text-text-primary leading-[1.2] tracking-tight">
               Temukan Jalur Karier dan Jurusan yang Paling Sesuai Untukmu
             </h1>
             <p className="font-body-lg text-lg text-text-secondary max-w-xl">
