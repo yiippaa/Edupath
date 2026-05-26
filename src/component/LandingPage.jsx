@@ -72,7 +72,7 @@ function LandingPage({
             {isLoggedIn ? (
               <button
                 onClick={onProfileClick}
-                className="flex items-center gap-3 hover:bg-slate-200 p-1.5 pl-4 rounded-full transition group"
+                className="flex items-center gap-3 hover:bg-slate-200 p-1.5 lg:pl-4 rounded-full transition group"
               >
                 <span className="font-bold text-slate-700 hidden md:block">
                   {firstName}
