@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Radar,
   RadarChart,
@@ -27,6 +27,13 @@ function ResultPage({
     school_name:
       localStorage.getItem("user_school") || "Sekolah Tidak Diketahui",
   });
+
+  const getMatchText = (score) => {
+    if (score >= 90) return "Sangat Direkomendasikan";
+    if (score >= 80) return "Sangat Cocok";
+    if (score >= 70) return "Pilihan Potensial";
+    return "Layak Dieksplorasi";
+  };
 
   // FETCH DATA PROFIL MENGGUNAKAN fetchWithAuth
   useEffect(() => {
@@ -81,43 +88,46 @@ function ResultPage({
 
   const careers = finalData?.career_matches || [];
 
-  const radarData = [
-    {
-      subject: `Math (${Number(academicData?.["Matematika"]) || 0})`,
-      A: Number(academicData?.["Matematika"]) || 0,
-      fullMark: 100,
-    },
-    {
-      subject: `English (${Number(academicData?.["Bahasa Inggris"]) || 0})`,
-      A: Number(academicData?.["Bahasa Inggris"]) || 0,
-      fullMark: 100,
-    },
-    {
-      subject: `Geography (${Number(academicData?.["Geografi"]) || 0})`,
-      A: Number(academicData?.["Geografi"]) || 0,
-      fullMark: 100,
-    },
-    {
-      subject: `History (${Number(academicData?.["Sejarah"]) || 0})`,
-      A: Number(academicData?.["Sejarah"]) || 0,
-      fullMark: 100,
-    },
-    {
-      subject: `Biology (${Number(academicData?.["Biologi"]) || 0})`,
-      A: Number(academicData?.["Biologi"]) || 0,
-      fullMark: 100,
-    },
-    {
-      subject: `Chemistry (${Number(academicData?.["Kimia"]) || 0})`,
-      A: Number(academicData?.["Kimia"]) || 0,
-      fullMark: 100,
-    },
-    {
-      subject: `Physics (${Number(academicData?.["Fisika"]) || 0})`,
-      A: Number(academicData?.["Fisika"]) || 0,
-      fullMark: 100,
-    },
-  ];
+  const radarData = useMemo(
+    () => [
+      {
+        subject: `Math (${Number(academicData?.["Matematika"]) || 0})`,
+        A: Number(academicData?.["Matematika"]) || 0,
+        fullMark: 100,
+      },
+      {
+        subject: `English (${Number(academicData?.["Bahasa Inggris"]) || 0})`,
+        A: Number(academicData?.["Bahasa Inggris"]) || 0,
+        fullMark: 100,
+      },
+      {
+        subject: `Geography (${Number(academicData?.["Geografi"]) || 0})`,
+        A: Number(academicData?.["Geografi"]) || 0,
+        fullMark: 100,
+      },
+      {
+        subject: `History (${Number(academicData?.["Sejarah"]) || 0})`,
+        A: Number(academicData?.["Sejarah"]) || 0,
+        fullMark: 100,
+      },
+      {
+        subject: `Biology (${Number(academicData?.["Biologi"]) || 0})`,
+        A: Number(academicData?.["Biologi"]) || 0,
+        fullMark: 100,
+      },
+      {
+        subject: `Chemistry (${Number(academicData?.["Kimia"]) || 0})`,
+        A: Number(academicData?.["Kimia"]) || 0,
+        fullMark: 100,
+      },
+      {
+        subject: `Physics (${Number(academicData?.["Fisika"]) || 0})`,
+        A: Number(academicData?.["Fisika"]) || 0,
+        fullMark: 100,
+      },
+    ],
+    [academicData],
+  ); // <--- Array dependency ini memberi tahu React kapan harus merender ulang radarData
 
   const calculateAverage = (list) => {
     const scores = list.map((key) => Number(academicData?.[key]) || 0);
@@ -147,6 +157,20 @@ function ResultPage({
 
   const isTrue = (value) =>
     value === true || value === "Yes" || value === "true";
+
+  // Referensi untuk kontainer grafik
+  const chartScrollRef = useRef(null);
+
+  // Efek untuk memusatkan posisi scroll saat komponen dirender
+  useEffect(() => {
+    if (chartScrollRef.current) {
+      const container = chartScrollRef.current;
+      // Menghitung titik tengah: (Total Lebar Konten - Lebar Layar yang Terlihat) / 2
+      const centerPosition =
+        (container.scrollWidth - container.clientWidth) / 2;
+      container.scrollLeft = centerPosition;
+    }
+  }, [radarData]); // Efek ini akan berjalan ketika data radar sudah siap
 
   if (!finalData)
     return (
@@ -218,50 +242,94 @@ function ResultPage({
           <div className="lg:col-span-2 space-y-6">
             {/* RADAR CHART */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-                <span className="text-blue-500 mr-2">🕸️</span> Profil Kemampuan
-                (Radar)
-              </h2>
-              <div className="w-full h-87.5">
-                <ResponsiveContainer width="100%" height="100%" minHeight={350}>
-                  <RadarChart
-                    cx="50%"
-                    cy="50%"
-                    outerRadius="70%"
-                    data={radarData}
-                  >
-                    <PolarGrid stroke="#e2e8f0" />
-                    <PolarAngleAxis
-                      dataKey="subject"
-                      tick={{ fill: "#475569", fontSize: 11, fontWeight: 600 }}
-                    />
-                    <PolarRadiusAxis
-                      angle={30}
-                      domain={[0, 100]}
-                      tick={false}
-                      axisLine={false}
-                    />
-                    <Radar
-                      name="Skor"
-                      dataKey="A"
-                      stroke="#2563eb"
-                      strokeWidth={2.5}
-                      fill="#3b82f6"
-                      fillOpacity={0.2}
-                      activeDot={{ r: 6, fill: "#2563eb" }}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-bold text-slate-800 flex items-center text-[16px] lg:text-[18px]">
+                  <span className="text-blue-500 mr-2 flex items-center">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                      ></path>
+                    </svg>
+                  </span>
+                  Radar Profil Kemampuan
+                </h2>
+              </div>
+
+              {/* 1. Wrapper overflow-x-auto untuk scrolling horizontal */}
+              <div
+                ref={chartScrollRef}
+                className="w-full overflow-x-auto pb-4 scrollbar-hide"
+              >
+                {/* 2. Beri min-w-[500px] agar ukuran chart tetap dipertahankan pada mobile */}
+                <div className="h-96 min-h-[350px] min-w-[500px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart
+                      cx="50%"
+                      cy="50%"
+                      outerRadius="70%" // Anda bisa mengembalikan radius ke ukuran aslinya
+                      data={radarData}
+                      margin={{ top: 20, right: 30, bottom: 20, left: 30 }} // Tambahkan sedikit margin tepi
+                    >
+                      <PolarGrid stroke="#e2e8f0" />
+                      <PolarAngleAxis
+                        dataKey="subject"
+                        tick={{
+                          fill: "#475569",
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}
+                      />
+                      <PolarRadiusAxis
+                        angle={30}
+                        domain={[0, 100]}
+                        tick={false}
+                        axisLine={false}
+                      />
+                      <Radar
+                        name="Skor"
+                        dataKey="A"
+                        stroke="#2563eb"
+                        strokeWidth={2.5}
+                        fill="#3b82f6"
+                        fillOpacity={0.2}
+                        activeDot={{ r: 6, fill: "#2563eb" }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
             {/* REKOMENDASI KARIR TERATAS */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-                <span className="text-blue-500 mr-2">🎯</span> Rekomendasi Karir
-                Teratas
+              <h2 className="text-[14px] lg:text-[18px] font-bold text-slate-800 mb-6 flex items-center">
+                <span className="text-blue-500 mr-2 flex items-center">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </span>
+                Rekomendasi Karir Teratas
               </h2>
 
+              {/* === TOP 1 DAN 2 === */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {careers.slice(0, 2).map((career, index) => {
                   const confidencePercent = Math.round(
@@ -274,25 +342,25 @@ function ResultPage({
                   return (
                     <div
                       key={index}
-                      className="border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition-all bg-white"
+                      className="border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition-all bg-white flex flex-col h-full"
                     >
-                      <div className="flex justify-between items-start mb-3">
+                      <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
                         <span className="text-slate-400 font-bold text-sm bg-slate-100 px-2 py-0.5 rounded">
                           #{index + 1}
                         </span>
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-                          {confidencePercent}% Match
+                        <span className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-center">
+                          {getMatchText(confidencePercent)}
                         </span>
                       </div>
                       <h3 className="font-bold text-slate-800 text-base mb-1">
                         {careerName}
                       </h3>
-                      <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-relaxed flex-grow">
                         {careerDesc}
                       </p>
 
                       {majorsList.length > 0 && (
-                        <div>
+                        <div className="mt-auto pt-3 border-t border-slate-50">
                           <p className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
                             Jurusan Terkait
                           </p>
@@ -313,6 +381,7 @@ function ResultPage({
                 })}
               </div>
 
+              {/* === PERINGKAT 3 DAN SETERUSNYA === */}
               {careers.length > 2 && (
                 <div className="mt-4 flex flex-col">
                   {showAllCareers && (
@@ -329,35 +398,45 @@ function ResultPage({
                         return (
                           <div
                             key={index}
-                            className="border border-slate-100 bg-slate-50/50 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                            className="border border-slate-100 bg-slate-50/50 rounded-xl p-4 flex flex-col md:flex-row md:items-start justify-between gap-4"
                           >
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className="text-slate-400 font-bold text-xs bg-white border border-slate-200 px-1.5 py-0.5 rounded">
-                                  #{index + 3}
-                                </span>
-                                <h4 className="font-bold text-slate-700 text-sm">
-                                  {careerName}
-                                </h4>
-                                <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                  {confidencePercent}% Match
-                                </span>
+                              {/* Pembungkus Responsif: Berbaris ke bawah di Mobile, Berjejer ke samping di Desktop */}
+                              <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2 mb-2.5">
+                                {/* Kiri (Desktop) / Atas (Mobile): Nomor Peringkat & Nama Karir */}
+                                <div className="flex items-center gap-2">
+                                  <span className="text-slate-400 font-bold text-xs bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                                    #{index + 3}
+                                  </span>
+                                  <h4 className="font-bold text-slate-700 text-sm">
+                                    {careerName}
+                                  </h4>
+                                </div>
+
+                                {/* Kanan (Desktop) / Bawah (Mobile): Tulisan Rekomendasi */}
+                                <div className="mt-0.5 md:mt-0">
+                                  <span className="inline-block text-[10px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full text-center">
+                                    {getMatchText(confidencePercent)}
+                                  </span>
+                                </div>
                               </div>
+
+                              {/* Deskripsi Karir */}
                               <p className="text-xs text-slate-500 leading-relaxed pr-2">
                                 {careerDesc}
                               </p>
                             </div>
 
                             {majorsList.length > 0 && (
-                              <div className="min-w-40">
-                                <p className="text-[9px] font-bold text-slate-400 mb-1 uppercase tracking-wider">
+                              <div className="md:min-w-40 border-t border-slate-200 md:border-t-0 pt-3 md:pt-0 mt-1 md:mt-0">
+                                <p className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
                                   Jurusan Terkait
                                 </p>
-                                <div className="flex flex-wrap gap-1">
+                                <div className="flex flex-wrap gap-1.5">
                                   {majorsList.map((major, i) => (
                                     <span
                                       key={i}
-                                      className="bg-white text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded border border-slate-200"
+                                      className="bg-white text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded border border-slate-200 shadow-sm"
                                     >
                                       {major?.major_name}
                                     </span>
@@ -396,6 +475,7 @@ function ResultPage({
               )}
             </div>
           </div>
+
           <div className="lg:col-span-1 space-y-6 text-center">
             {/* BOX STATISTIK */}
             <div className="grid grid-cols-3 gap-3 text-nowrap">
@@ -539,8 +619,22 @@ function ResultPage({
             {/* PROFIL BELAJAR */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
               <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center">
-                <span className="text-blue-500 mr-2">🚀</span> Profil &
-                Kebiasaan Belajar
+                <span className="text-blue-500 mr-2 flex items-center">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    ></path>
+                  </svg>
+                </span>
+                Profil & Kebiasaan Belajar
               </h3>
               <div className="space-y-3.5 text-xs">
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
@@ -585,8 +679,22 @@ function ResultPage({
             {/* REFERENSI AKADEMIK */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
               <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center">
-                <span className="text-blue-500 mr-2">🎓</span> Referensi
-                Akademik
+                <span className="text-blue-500 mr-2 flex items-center">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    ></path>
+                  </svg>
+                </span>
+                Referensi Akademik
               </h3>
               <div className="space-y-3">
                 {referensiList.length > 0 ? (
