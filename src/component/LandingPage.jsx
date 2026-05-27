@@ -237,7 +237,7 @@ function LandingPage({
 
               {/* Card 3: Visualisasi Interaktif */}
               <div className="bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/50 border border-slate-100 transition-all duration-300 hover:-translate-y-1 flex flex-col items-start space-y-6">
-                <div className="w-16 h-16 bg-tertiary-container rounded-2xl flex items-center justify-center text-on-tertiary">
+                <div className="w-16 h-16 bg-purple-700 rounded-2xl flex items-center justify-center text-on-tertiary">
                   <span
                     className="material-symbols-outlined text-3xl"
                     style={{
