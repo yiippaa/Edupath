@@ -1,23 +1,48 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 // IMPORT FETCH OTOMATIS & LOADING PAGE
 import { fetchWithAuth } from "../Utils/auth";
-import LoadingPage from "./LoadingPage";
 
 function PsychometricForm({
   onBack,
   academicData,
   onSubmitSuccess,
   onProfileClick,
+  savedBehavioral,
+  onSaveBehavioral,
 }) {
-  const [studyHours, setStudyHours] = useState(10);
-  const [absentDays, setAbsentDays] = useState("");
-
-  const [partTimeJob, setPartTimeJob] = useState("No");
-  const [extracurricular, setExtracurricular] = useState("No");
+  const [studyHours, setStudyHours] = useState(
+    savedBehavioral?.studyHours ?? 10,
+  );
+  const [absentDays, setAbsentDays] = useState(
+    savedBehavioral?.absentDays ?? "",
+  );
+  const [partTimeJob, setPartTimeJob] = useState(
+    savedBehavioral?.partTimeJob ?? "No",
+  );
+  const [extracurricular, setExtracurricular] = useState(
+    savedBehavioral?.extracurricular ?? "No",
+  );
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [initials, setInitials] = useState("U");
+
+  const [progress, setProgress] = useState(0); // State untuk persentase progress
+  const [loadingText, setLoadingText] = useState(""); // State untuk teks informasi
+
+  const handleGoBack = (target) => {
+    // 1. Simpan data yang sedang diisi ke App.jsx sebelum pindah
+    if (onSaveBehavioral) {
+      onSaveBehavioral({
+        studyHours,
+        absentDays,
+        partTimeJob,
+        extracurricular,
+      });
+    }
+    // 2. Eksekusi perpindahan halaman
+    if (onBack) onBack(target);
+  };
 
   useEffect(() => {
     const fullName = localStorage.getItem("user_name");
@@ -57,6 +82,8 @@ function PsychometricForm({
       const API_URL = "https://edupath-backend.vercel.app/api/v1";
 
       // 1. Submit Assessment (MENGGUNAKAN fetchWithAuth)
+      setProgress(30);
+      setLoadingText("Menyimpan data assessment akademik...");
       const assessRes = await fetchWithAuth(`${API_URL}/assessments`, {
         method: "POST",
         body: JSON.stringify(payload),
@@ -66,6 +93,8 @@ function PsychometricForm({
       const assessmentId = assessData.data.assessment_id;
 
       // 2. Generate Prediction (MENGGUNAKAN fetchWithAuth)
+      setProgress(60);
+      setLoadingText("AI sedang menganalisis kecocokan jurusan...");
       const predictRes = await fetchWithAuth(
         `${API_URL}/recommendations/predict`,
         {
@@ -78,11 +107,16 @@ function PsychometricForm({
       const recommendationId = predictData.data.recommendation_id;
 
       // 3. Get Recommendation Details (MENGGUNAKAN fetchWithAuth)
+      setProgress(90);
+      setLoadingText("Mengambil detail rekomendasi Anda...");
       const resultRes = await fetchWithAuth(
         `${API_URL}/recommendations/${recommendationId}`,
       );
       if (!resultRes.ok) throw new Error("Gagal mengambil detail hasil");
       const finalResult = await resultRes.json();
+
+      setProgress(100);
+      setLoadingText("Selesai! Mengalihkan ke halaman hasil...");
 
       setTimeout(() => {
         if (onSubmitSuccess) onSubmitSuccess(finalResult, payload);
@@ -90,7 +124,27 @@ function PsychometricForm({
     } catch (error) {
       console.warn("API Backend gagal. Menggunakan simulasi lokal.");
 
+      // Setup Simulasi Loading Bertahap
+      setProgress(20);
+      setLoadingText("Memulai simulasi AI lokal...");
+
+      let currentProgress = 20;
+      const progressInterval = setInterval(() => {
+        currentProgress += 15;
+        if (currentProgress <= 90) {
+          setProgress(currentProgress);
+          if (currentProgress > 40)
+            setLoadingText("Memproses profil kognitif...");
+          if (currentProgress > 70)
+            setLoadingText("Mencocokkan jalur karir...");
+        }
+      }, 500); // Bertambah setiap 0.5 detik
+
       setTimeout(() => {
+        clearInterval(progressInterval);
+        setProgress(100);
+        setLoadingText("Simulasi selesai! Menampilkan hasil...");
+
         const mockAPIResponse = {
           success: true,
           data: {
@@ -135,49 +189,122 @@ function PsychometricForm({
             ],
           },
         };
-        if (onSubmitSuccess) onSubmitSuccess(mockAPIResponse, payload);
-
-        // Kita letakkan setIsLoading(false) di dalam catch, karena jika API sukses,
-        // halaman akan langsung berpindah via onSubmitSuccess (jadi tidak perlu set false).
-        setIsLoading(false);
-      }, 3500); // Simulasi agak lama agar loading animasi terlihat
+        setTimeout(() => {
+          if (onSubmitSuccess) onSubmitSuccess(mockAPIResponse, payload);
+          setIsLoading(false);
+        }, 800);
+      }, 3500);
     }
   };
 
-  const handleGoHome = () => {
-    if (onBack) onBack("home");
+  // Referensi untuk masing-masing blok input
+  const studyRef = useRef(null);
+  const absentRef = useRef(null);
+  const jobRef = useRef(null);
+  const extraRef = useRef(null);
+  const submitRef = useRef(null);
+
+  const blockRefs = [studyRef, absentRef, jobRef, extraRef, submitRef];
+
+  // Fungsi pengelola perpindahan fokus
+  const handleArrowNavigation = (e, currentIndex) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault(); // Mencegah layar ikut ter-scroll
+      const nextIndex = Math.min(currentIndex + 1, blockRefs.length - 1);
+      blockRefs[nextIndex].current?.focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIndex = Math.max(currentIndex - 1, 0);
+      blockRefs[prevIndex].current?.focus();
+    }
   };
 
-  // =======================================================
-  // KUNCI UTAMA: Cegat render jika sedang loading
-  // =======================================================
   if (isLoading) {
-    return <LoadingPage />;
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100 transition-all">
+          <div className="flex justify-center mb-6">
+            {/* Animasi Spinner Kecil */}
+            <svg
+              className="w-12 h-12 text-blue-600 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          </div>
+
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">
+            Memproses Data
+          </h2>
+          <p className="text-slate-500 text-sm mb-8 h-5 font-medium">
+            {loadingText}
+          </p>
+
+          <div className="w-full bg-slate-100 rounded-full h-3 mb-3 overflow-hidden relative">
+            <div
+              className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+
+          <div className="text-right text-sm font-bold text-blue-600">
+            {progress}%
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Tampilan Form Utama (hanya akan dirender jika isLoading === false)
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
-      <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center w-full">
-        <div className="flex items-center text-blue-700 font-bold text-lg">
-          <span className="mr-2">🎓</span> EduPath
-        </div>
-
-        <nav className="hidden md:flex space-x-8 text-sm font-medium text-slate-500">
-          <button
-            onClick={handleGoHome}
-            className="text-blue-600 font-bold text-lg hover:text-blue-700 transition"
-          >
-            Home
-          </button>
-        </nav>
-
-        <div
-          onClick={onProfileClick}
-          className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center text-sm font-bold shadow-sm cursor-pointer hover:bg-slate-800 transition"
-          title="Lihat Profil"
-        >
-          {initials}
+      <header className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-md transition-all duration-300 ease-in-out border-b border-slate-200">
+        <div className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
+          <div className="flex-1 flex items-center">
+            <button
+              onClick={() => handleGoBack("step1")}
+              className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-semibold"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className="font-h2 text-h2 text-blue-700 tracking-tight font-bold text-center text-xl">
+            EduPath
+          </div>
+          <div className="flex-1 flex justify-end">
+            <div
+              onClick={onProfileClick}
+              className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition"
+              title="Lihat Profil"
+            >
+              {initials}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -212,12 +339,14 @@ function PsychometricForm({
                 </span>
               </div>
               <input
+                ref={studyRef}
                 type="range"
                 min="0"
                 max="40"
                 value={studyHours}
                 onChange={(e) => setStudyHours(e.target.value)}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                onKeyDown={(e) => handleArrowNavigation(e, 0)}
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               />
               <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium">
                 <span>0</span>
@@ -246,17 +375,36 @@ function PsychometricForm({
                   </svg>
                 </div>
                 <input
+                  ref={absentRef}
                   type="number"
                   min="0"
+                  required
                   placeholder="e.g. 2"
                   value={absentDays}
                   onChange={(e) => setAbsentDays(e.target.value)}
+                  onKeyDown={(e) => handleArrowNavigation(e, 1)}
                   className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition"
                 />
               </div>
             </div>
 
-            <div className="mb-8">
+            <div
+              ref={jobRef}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                handleArrowNavigation(e, 2);
+                // Shortcut untuk memilih jawaban dengan panah Kiri/Kanan
+                if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  setPartTimeJob("Yes");
+                }
+                if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  setPartTimeJob("No");
+                }
+              }}
+              className="mb-8 outline-none focus:ring-2 focus:ring-blue-200 rounded-xl p-2 -mx-2 transition-all"
+            >
               <label className="block text-sm font-medium text-slate-700 mb-3">
                 Apakah Anda saat ini memiliki pekerjaan paruh waktu?
               </label>
@@ -317,7 +465,23 @@ function PsychometricForm({
               </div>
             </div>
 
-            <div className="mb-12">
+            <div
+              ref={extraRef}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                handleArrowNavigation(e, 3);
+                // Shortcut untuk memilih jawaban dengan panah Kiri/Kanan
+                if (e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  setExtracurricular("Yes");
+                }
+                if (e.key === "ArrowRight") {
+                  e.preventDefault();
+                  setExtracurricular("No");
+                }
+              }}
+              className="mb-12 outline-none focus:ring-2 focus:ring-blue-200 rounded-xl p-2 -mx-2 transition-all"
+            >
               <label className="block text-sm font-medium text-slate-700 mb-3">
                 Apakah Anda aktif mengikuti kegiatan ekstrakurikuler?
               </label>
@@ -378,21 +542,19 @@ function PsychometricForm({
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+            <div className="flex justify-end pt-4 border-t border-slate-100">
               <button
-                type="button"
-                onClick={() => onBack("step1")}
-                disabled={isLoading}
-                className={`px-6 py-3 border border-slate-300 text-slate-600 font-medium rounded-lg transition hover:bg-slate-50`}
-              >
-                Kembali
-              </button>
-              <button
+                ref={submitRef}
                 type="submit"
-                disabled={isLoading}
-                className={`font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center text-white bg-[#0f763b] hover:bg-green-800`}
+                disabled={isLoading || absentDays === ""}
+                onKeyDown={(e) => handleArrowNavigation(e, 4)}
+                className={`font-semibold py-3 px-6 rounded-lg shadow-md transition flex items-center text-white focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 ${
+                  isLoading || absentDays === ""
+                    ? "bg-slate-400 cursor-not-allowed"
+                    : "bg-[#0f763b] hover:bg-green-800"
+                }`}
               >
-                Kirim & Analisis Data
+                Analisis Data
                 <svg
                   className="w-5 h-5 ml-2"
                   fill="none"
