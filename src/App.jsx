@@ -28,6 +28,19 @@ function App() {
   });
   const [resultSource, setResultSource] = useState("form");
 
+  const clearAssessmentSession = () => {
+    // 1. Reset state React ke null
+    setAcademicData(null);
+    setBehavioralData(null);
+    setResultData(null);
+
+    // 2. Hapus key terkait dari localStorage
+    localStorage.removeItem("edupath_academic_data");
+    localStorage.removeItem("edupath_behavioral_data");
+    localStorage.removeItem("edupath_result_data");
+    localStorage.removeItem("edupath_current_page");
+  };
+
   // Sinkronisasi data halaman aktif
   useEffect(() => {
     localStorage.setItem("edupath_current_page", currentPage);
@@ -85,7 +98,10 @@ function App() {
   if (currentPage === "login") {
     return (
       <Login
-        onLoginSuccess={() => setCurrentPage("landing")}
+        onLoginSuccess={() => {
+          clearAssessmentSession(); // <--- BERSIHKAN DATA SEBELUM MASUK LANDING
+          setCurrentPage("landing");
+        }}
         onNavigateRegister={() => setCurrentPage("register")}
         onBack={() => setCurrentPage("landing")}
       />
@@ -106,7 +122,10 @@ function App() {
     return (
       <UserProfilePage
         onBack={() => setCurrentPage(previousPage || "landing")}
-        onLogout={() => setCurrentPage("landing")}
+        onLogout={() => {
+          clearAssessmentSession(); // <--- BERSIHKAN DATA SAAT USER KELUAR
+          setCurrentPage("landing");
+        }}
         onNavigateToResult={(resData, acaData, behData) => {
           setResultData(resData);
           setAcademicData(acaData);
@@ -117,6 +136,7 @@ function App() {
       />
     );
   }
+
   if (currentPage === "onboarding") {
     return (
       <OnboardingPage
