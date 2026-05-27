@@ -12,10 +12,15 @@ import UserProfilePage from './component/UserProfilePage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
+  const [previousPage, setPreviousPage] = useState(null);
   const [academicData, setAcademicData] = useState(null);
   const [resultData, setResultData] = useState(null);
   const [behavioralData, setBehavioralData] = useState(null);
 
+  const handleNavigateToProfile = () => {
+    setPreviousPage(currentPage);
+    setCurrentPage('profile');
+  };
 
   if (currentPage === 'landing') {
     return (
@@ -23,7 +28,7 @@ function App() {
         onStart={() => setCurrentPage('onboarding')} 
         onLoginClick={() => setCurrentPage('login')} 
         onRegisterClick={() => setCurrentPage('register')} 
-        onProfileClick={() => setCurrentPage('profile')}   
+        onProfileClick={handleNavigateToProfile}   
       />
     );
   }
@@ -51,8 +56,14 @@ function App() {
   if (currentPage === 'profile') {
     return (
       <UserProfilePage 
-        onBack={() => setCurrentPage('landing')} 
-        onLogout={() => setCurrentPage('landing')} 
+        onBack={() => setCurrentPage(previousPage || 'landing')} 
+        onLogout={() => setCurrentPage('landing')}
+        onNavigateToResult={(resData, acaData, behData) => {
+          setResultData(resData);
+          setAcademicData(acaData);
+          setBehavioralData(behData);
+          setCurrentPage('result');
+        }}
       />
     );
   }
@@ -60,14 +71,14 @@ function App() {
   if (currentPage === 'onboarding') {
     return <OnboardingPage onNext={() => setCurrentPage('assessment_step1')}
     onBack={() => setCurrentPage('landing')}
-    onProfileClick={() => setCurrentPage('profile')} />;
+    onProfileClick={handleNavigateToProfile} />;
   }
 
   if (currentPage === 'assessment_step1') {
     return (
       <AssessmentForm 
         onBack={() => setCurrentPage('onboarding')} // Tombol Home menuju beranda
-        onProfileClick={() => setCurrentPage('profile')} // Avatar profil 
+        onProfileClick={handleNavigateToProfile} // Avatar profil 
         onNext={(data) => {
           setAcademicData(data); //Simpan data nilai dari Step 1
           setCurrentPage('assessment_step2');
@@ -80,8 +91,7 @@ function App() {
     return (
       <PsychometricForm
         academicData={academicData}
-        onBack={() => setCurrentPage('assessment_step1')}
-        onProfileClick={() => setCurrentPage('profile')} // Avatar profil
+        onProfileClick={handleNavigateToProfile} // Avatar profil
         onBack={(target) => {
           if (target === 'home') {
             setCurrentPage('landing'); // Jika klik tulisan Home di header
