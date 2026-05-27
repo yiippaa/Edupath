@@ -15,6 +15,13 @@ function OnboardingPage({ onNext, onBack, onProfileClick }) {
   // State untuk inisial profil
   const [initials, setInitials] = useState("U");
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "auto", // Ubah menjadi "auto" jika tidak ingin ada animasi gulir
+    });
+  }, []);
+
   // Mengambil nama dari localStorage untuk dijadikan inisial (misal: Ivan Kolap -> IK)
   useEffect(() => {
     const fullName = localStorage.getItem("user_name");
