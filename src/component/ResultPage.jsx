@@ -266,7 +266,7 @@ function ResultPage({
                       ></path>
                     </svg>
                   </span>
-                  Radar Profil Kemampuan
+                  Radar Kemampuan
                 </h2>
               </div>
 
@@ -317,7 +317,7 @@ function ResultPage({
 
             {/* REKOMENDASI KARIR TERATAS */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="text-[14px] lg:text-[18px] font-bold text-slate-800 mb-6 flex items-center">
+              <h2 className="text-[16px] lg:text-[18px] font-bold text-slate-800 mb-6 flex items-center">
                 <span className="text-blue-500 mr-2 flex items-center">
                   <svg
                     className="w-5 h-5"
@@ -333,11 +333,12 @@ function ResultPage({
                     ></path>
                   </svg>
                 </span>
-                Rekomendasi Karir Teratas
+                Rekomendasi Karir
               </h2>
 
               {/* === TOP 1 DAN 2 === */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* === TOP 1 DAN 2 === */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {careers.slice(0, 2).map((career, index) => {
                   const confidencePercent = Math.round(
                     career?.confidence_score || 0,
@@ -346,36 +347,78 @@ function ResultPage({
                   const careerDesc = career?.description || "Deskripsi Karir";
                   const majorsList = career?.related_majors || [];
 
+                  // LOGIKA STYLING SERAGAM UNTUK TOP 1 & 2
+
+                  // Border warna emas (amber) untuk keduanya
+                  const cardBorderColor = "border-blue-300";
+                  const cardHoverColor =
+                    "hover:border-blue-400 hover:shadow-blue-100/60";
+                  // Lencana peringkat warna biru untuk keduanya
+                  const badgeStyle =
+                    "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm";
+
                   return (
                     <div
                       key={index}
-                      className="border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition-all bg-white flex flex-col h-full"
+                      className={`border-2 rounded-2xl p-6 transition-all duration-300 bg-white flex flex-col h-full shadow-sm hover:shadow-md ${cardBorderColor} ${cardHoverColor}`}
                     >
-                      <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
-                        <span className="text-slate-400 font-bold text-sm bg-slate-100 px-2 py-0.5 rounded">
+                      <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
+                        {/* Lencana Peringkat Biru */}
+                        <span
+                          className={`font-bold text-xs px-2.5 py-1 rounded-lg flex items-center ${badgeStyle}`}
+                        >
                           #{index + 1}
                         </span>
-                        <span className="text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-center">
+
+                        {/* Lencana Kesesuaian */}
+                        <span className="text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700 text-center border border-green-200">
                           {getMatchText(confidencePercent)}
                         </span>
                       </div>
-                      <h3 className="font-bold text-slate-800 text-base mb-1">
+
+                      <h3 className="font-extrabold text-slate-800 text-lg mb-1.5">
                         {careerName}
                       </h3>
-                      <p className="text-xs text-slate-500 mb-4 line-clamp-2 leading-relaxed flex-grow">
+
+                      <p className="text-xs text-slate-500 mb-5 line-clamp-3 leading-relaxed flex-grow">
                         {careerDesc}
                       </p>
 
                       {majorsList.length > 0 && (
-                        <div className="mt-auto pt-3 border-t border-slate-50">
-                          <p className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
-                            Jurusan Terkait
+                        <div className="mt-auto p-4 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 rounded-xl border border-blue-100/60 flex-grow-0">
+                          <p className="text-xs font-bold text-blue-800 mb-2.5 flex items-center uppercase tracking-wider">
+                            <svg
+                              className="w-4 h-4 mr-1.5 opacity-80"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 14l9-5-9-5-9 5 9 5z"
+                              ></path>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                              ></path>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6v6"
+                              ></path>
+                            </svg>
+                            Rekomendasi Jurusan
                           </p>
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-2">
                             {majorsList.map((major, i) => (
                               <span
                                 key={i}
-                                className="bg-blue-50 text-blue-600 text-[10px] font-semibold px-2 py-0.5 rounded border border-blue-100"
+                                className="bg-white text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm"
                               >
                                 {major?.major_name}
                               </span>
@@ -434,16 +477,42 @@ function ResultPage({
                               </p>
                             </div>
 
+                            {/* Bagian Jurusan Terkait yang Diperbarui (Peringkat 3+) */}
                             {majorsList.length > 0 && (
-                              <div className="md:min-w-40 border-t border-slate-200 md:border-t-0 pt-3 md:pt-0 mt-1 md:mt-0">
-                                <p className="text-[9px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">
+                              <div className="md:min-w-[220px] border-t border-slate-200 md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 md:pl-5 md:border-l border-slate-200">
+                                <p className="text-[10px] font-bold text-slate-500 mb-2.5 flex items-center uppercase tracking-wider">
+                                  <svg
+                                    className="w-4 h-4 mr-1.5 opacity-80"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M12 14l9-5-9-5-9 5 9 5z"
+                                    ></path>
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                                    ></path>
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6v6"
+                                    ></path>
+                                  </svg>
                                   Jurusan Terkait
                                 </p>
                                 <div className="flex flex-wrap gap-1.5">
                                   {majorsList.map((major, i) => (
                                     <span
                                       key={i}
-                                      className="bg-white text-slate-600 text-[10px] font-medium px-2 py-0.5 rounded border border-slate-200 shadow-sm"
+                                      className="bg-slate-100 text-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-slate-200 shadow-sm hover:bg-white transition-colors"
                                     >
                                       {major?.major_name}
                                     </span>
