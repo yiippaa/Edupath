@@ -28,6 +28,13 @@ function ResultPage({
       localStorage.getItem("user_school") || "Sekolah Tidak Diketahui",
   });
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "auto", // Ubah menjadi "auto" jika tidak ingin ada animasi gulir
+    });
+  }, []);
+
   const getMatchText = (score) => {
     if (score >= 90) return "Sangat Direkomendasikan";
     if (score >= 80) return "Sangat Cocok";

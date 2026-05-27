@@ -30,6 +30,13 @@ function PsychometricForm({
   const [progress, setProgress] = useState(0); // State untuk persentase progress
   const [loadingText, setLoadingText] = useState(""); // State untuk teks informasi
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "auto", // Ubah menjadi "auto" jika tidak ingin ada animasi gulir
+    });
+  }, []);
+
   const handleGoBack = (target) => {
     // 1. Simpan data yang sedang diisi ke App.jsx sebelum pindah
     if (onSaveBehavioral) {
@@ -311,9 +318,8 @@ function PsychometricForm({
       <main className="flex-1 flex justify-center py-12 px-4">
         <div className="bg-white w-full max-w-2xl rounded-xl shadow-sm border border-slate-200 p-8 md:p-12">
           <div className="mb-10">
-            <div className="flex justify-between items-end mb-2 text-sm font-medium">
-              <span className="text-slate-600">Langkah 2 dari 2</span>
-              <span className="text-blue-600">Psikometri & Kebiasaan</span>
+            <div className="flex justify-between items-end mb-2 text-sm font-medium text-slate-600">
+              <span>Langkah 2: Psikometri & Kebiasaan</span>
             </div>
             <div className="w-full bg-blue-600 rounded-full h-1.5 relative"></div>
           </div>

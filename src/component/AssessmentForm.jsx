@@ -26,6 +26,13 @@ function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
   // State untuk inisial profil
   const [initials, setInitials] = useState("U");
 
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "auto", // Ubah menjadi "auto" jika tidak ingin ada animasi gulir
+    });
+  }, []);
+
   // Mengambil nama dari localStorage
   useEffect(() => {
     const fullName = localStorage.getItem("user_name");
@@ -142,8 +149,7 @@ function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
           {/* Progress Bar */}
           <div className="mb-10">
             <div className="flex justify-between items-end mb-2 text-sm font-medium text-slate-600">
-              <span>Langkah 1 dari 2: Data Akademik</span>
-              <span className="text-blue-600">50%</span>
+              <span>Langkah 1: Data Akademik</span>
             </div>
             <div className="w-full bg-slate-200 rounded-full h-2">
               <div
