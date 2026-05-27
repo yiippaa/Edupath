@@ -55,69 +55,16 @@ function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
       const result = await response.json();
 
       if (result.success && result.data) {
-        // Tampilkan daftar asesmen segera mungkin
-        setHistoryList(result.data);
-        setIsLoadingHistory(false); // Matikan loading utama
+        // Saring array agar hanya menyimpan data dengan status 'processed'
+        const completedAssessments = result.data.filter(
+          (item) => item.status === "processed",
+        );
 
-        // Ambil data rekomendasi singkat untuk setiap riwayat secara progresif
-        result.data.forEach(async (item) => {
-          try {
-            const predictRes = await fetchWithAuth(
-              "https://edupath-backend.vercel.app/api/v1/recommendations/predict",
-              {
-                method: "POST",
-                body: JSON.stringify({ assessment_id: item.assessment_id }),
-              },
-            );
-            const predictData = await predictRes.json();
-
-            if (predictData.success && predictData.data?.recommendation_id) {
-              const recId = predictData.data.recommendation_id;
-              const recRes = await fetchWithAuth(
-                `https://edupath-backend.vercel.app/api/v1/recommendations/${recId}`,
-              );
-              const recData = await recRes.json();
-
-              if (
-                recData.success &&
-                recData.data?.career_matches?.length > 0
-              ) {
-                setHistoryList((prevList) =>
-                  prevList.map((prevItem) => {
-                    if (prevItem.assessment_id === item.assessment_id) {
-                      return {
-                        ...prevItem,
-                        recommendation_id: recId,
-                        top_career: recData.data.career_matches[0].career_name,
-                        confidence: recData.data.career_matches[0].confidence_score,
-                        second_career:
-                          recData.data.career_matches.length > 1
-                            ? recData.data.career_matches[1].career_name
-                            : undefined,
-                        second_confidence:
-                          recData.data.career_matches.length > 1
-                            ? recData.data.career_matches[1].confidence_score
-                            : undefined,
-                      };
-                    }
-                    return prevItem;
-                  })
-                );
-              }
-            }
-          } catch (err) {
-            console.error(
-              "Gagal mengambil rekomendasi untuk asesmen",
-              item.assessment_id,
-              err,
-            );
-          }
-        });
-      } else {
-        setIsLoadingHistory(false);
+        setHistoryList(completedAssessments);
       }
     } catch (error) {
       console.error("Gagal mengambil riwayat asesmen:", error);
+    } finally {
       setIsLoadingHistory(false);
     }
   };
@@ -616,7 +563,7 @@ function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
                     </div>
                   ) : (
                     <p className="text-xs text-slate-400 mb-4 mt-2 italic flex items-center gap-1">
-                      <div className="w-3 h-3 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin"></div>
+                      <span className="w-3 h-3 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin"></span>
                       Memuat rekomendasi...
                     </p>
                   )}

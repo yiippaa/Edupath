@@ -15,6 +15,7 @@ function App() {
   const [academicData, setAcademicData] = useState(null);
   const [resultData, setResultData] = useState(null);
   const [behavioralData, setBehavioralData] = useState(null);
+  const [resultSource, setResultSource] = useState("form");
 
   const handleNavigateToProfile = () => {
     setPreviousPage(currentPage);
@@ -61,12 +62,12 @@ function App() {
           setResultData(resData);
           setAcademicData(acaData);
           setBehavioralData(behData);
+          setResultSource("history");
           setCurrentPage("result");
         }}
       />
     );
   }
-
   if (currentPage === "onboarding") {
     return (
       <OnboardingPage
@@ -95,8 +96,8 @@ function App() {
     return (
       <PsychometricForm
         academicData={academicData}
-        savedBehavioral={behavioralData} // <-- Kirim data yang tersimpan
-        onSaveBehavioral={(data) => setBehavioralData(data)} // <-- Fungsi untuk menyimpan saat tombol back ditekan
+        savedBehavioral={behavioralData}
+        onSaveBehavioral={(data) => setBehavioralData(data)}
         onProfileClick={handleNavigateToProfile}
         onBack={(target) => {
           if (target === "home") {
@@ -108,12 +109,12 @@ function App() {
         onSubmitSuccess={(apiResponse, payloadStep2) => {
           setResultData(apiResponse);
           setBehavioralData(payloadStep2);
-          setCurrentPage("result"); // Hapus baris loading ganda agar langsung masuk ke result
+          setResultSource("form"); // <--- Atur penanda selesai isi form baru
+          setCurrentPage("result");
         }}
       />
     );
   }
-
   if (currentPage === "loading") {
     return <LoadingPage />;
   }
@@ -124,13 +125,21 @@ function App() {
         resultData={resultData}
         academicData={academicData}
         behavioralData={behavioralData}
+        onProfileClick={handleNavigateToProfile}
         onRetry={() => {
           setAcademicData(null);
           setResultData(null);
           setBehavioralData(null);
           setCurrentPage("assessment_step1");
         }}
-        onBack={() => setCurrentPage("landing")}
+        onBack={() => {
+          // Cek skenario kedatangan user
+          if (resultSource === "history") {
+            setCurrentPage("profile"); // Kembali ke profile jika dari riwayat
+          } else {
+            setCurrentPage("landing"); // Kembali ke landing page jika baru selesai form
+          }
+        }}
       />
     );
   }
