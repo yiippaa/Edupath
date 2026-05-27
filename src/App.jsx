@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LandingPage from "./component/LandingPage";
 import OnboardingPage from "./component/OnBoardingPage";
 import AssessmentForm from "./component/AssessmentForm";
@@ -10,12 +10,61 @@ import Register from "./component/Register";
 import UserProfilePage from "./component/UserProfilePage";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("landing");
+  const [currentPage, setCurrentPage] = useState(() => {
+    return localStorage.getItem("edupath_current_page") || "landing";
+  });
   const [previousPage, setPreviousPage] = useState(null);
-  const [academicData, setAcademicData] = useState(null);
-  const [resultData, setResultData] = useState(null);
-  const [behavioralData, setBehavioralData] = useState(null);
+  const [academicData, setAcademicData] = useState(() => {
+    const saved = localStorage.getItem("edupath_academic_data");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [resultData, setResultData] = useState(() => {
+    const saved = localStorage.getItem("edupath_result_data");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [behavioralData, setBehavioralData] = useState(() => {
+    const saved = localStorage.getItem("edupath_behavioral_data");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [resultSource, setResultSource] = useState("form");
+
+  // Sinkronisasi data halaman aktif
+  useEffect(() => {
+    localStorage.setItem("edupath_current_page", currentPage);
+  }, [currentPage]);
+
+  // Sinkronisasi data akademik step 1
+  useEffect(() => {
+    if (academicData) {
+      localStorage.setItem(
+        "edupath_academic_data",
+        JSON.stringify(academicData),
+      );
+    } else {
+      localStorage.removeItem("edupath_academic_data");
+    }
+  }, [academicData]);
+
+  // Sinkronisasi data perilaku/psikometri step 2
+  useEffect(() => {
+    if (behavioralData) {
+      localStorage.setItem(
+        "edupath_behavioral_data",
+        JSON.stringify(behavioralData),
+      );
+    } else {
+      localStorage.removeItem("edupath_behavioral_data");
+    }
+  }, [behavioralData]);
+
+  // Sinkronisasi data hasil analisis AI
+  useEffect(() => {
+    if (resultData) {
+      localStorage.setItem("edupath_result_data", JSON.stringify(resultData));
+    } else {
+      localStorage.removeItem("edupath_result_data");
+    }
+  }, [resultData]);
 
   const handleNavigateToProfile = () => {
     setPreviousPage(currentPage);
@@ -128,16 +177,20 @@ function App() {
         onProfileClick={handleNavigateToProfile}
         onRetry={() => {
           setAcademicData(null);
-          setResultData(null);
           setBehavioralData(null);
+          setResultData(null);
+
+          localStorage.removeItem("edupath_academic_data");
+          localStorage.removeItem("edupath_behavioral_data");
+          localStorage.removeItem("edupath_result_data");
+
           setCurrentPage("assessment_step1");
         }}
         onBack={() => {
-          // Cek skenario kedatangan user
           if (resultSource === "history") {
-            setCurrentPage("profile"); // Kembali ke profile jika dari riwayat
+            setCurrentPage("profile");
           } else {
-            setCurrentPage("landing"); // Kembali ke landing page jika baru selesai form
+            setCurrentPage("landing");
           }
         }}
       />
