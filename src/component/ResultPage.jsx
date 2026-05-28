@@ -8,6 +8,50 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { fetchWithAuth } from "../Utils/auth";
+import { toPng } from "html-to-image";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Image as PdfImage,
+  pdf,
+} from "@react-pdf/renderer";
+import { createTw } from "react-pdf-tailwind";
+
+const tw = createTw({
+  theme: {
+    fontFamily: {
+      sans: ["Helvetica"],
+      serif: ["Times-Roman"],
+      mono: ["Courier"],
+    },
+    extend: {
+      colors: {
+        blue: {
+          50: "#eff6ff",
+          100: "#dbeafe",
+          500: "#3b82f6",
+          600: "#2563eb",
+          800: "#1e40af",
+        },
+        slate: {
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+        },
+        green: { 100: "#dcfce3", 700: "#15803d" },
+      },
+    },
+  },
+});
 
 function ResultPage({
   onRetry,
@@ -18,8 +62,21 @@ function ResultPage({
 }) {
   const finalData = resultData?.data || resultData;
 
-  const [openAccordion, setOpenAccordion] = useState("alasan");
+  const [openAccordions, setOpenAccordions] = useState({
+    alasan: true,
+    kekuatan: false,
+    saran: false,
+  });
+
+  const toggleAccordion = (key) => {
+    setOpenAccordions((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
   const [showAllCareers, setShowAllCareers] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // STATE DATA USER
   const [userData, setUserData] = useState({
@@ -158,8 +215,441 @@ function ResultPage({
     2
   ).toFixed(1);
 
-  const handleDownloadPDF = () => {
-    window.print();
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPDF(true);
+    try {
+      let chartImage = null;
+      const ghostChartElement = document.getElementById("pdf-ghost-chart");
+      
+      if (ghostChartElement) {
+        // Gunakan html-to-image untuk menangkap elemen ghost chart (kualitas desktop)
+        chartImage = await toPng(ghostChartElement, {
+          pixelRatio: 2,
+          fontEmbedCSS: "",
+        });
+      } else if (chartScrollRef.current) {
+        // Fallback jika ghost chart tidak ada
+        chartImage = await toPng(chartScrollRef.current, {
+          pixelRatio: 2,
+          fontEmbedCSS: "",
+        });
+      }
+
+      const ResultPDF = () => (
+        <Document>
+          {/* Tambahkan padding bawah pada Page agar konten tidak menabrak footer */}
+          <Page size="A4" style={tw("bg-slate-50 pb-16")}>
+            {/* ── HEADER BANNER (Eksklusif Dark Theme) ── */}
+            <View style={tw("bg-slate-800 px-8 pt-8 pb-6")}>
+              {/* Top row: branding + identity */}
+              <View
+                style={tw("flex flex-row justify-between items-start mb-5")}
+              >
+                <View>
+                  <Text
+                    style={tw(
+                      "text-[24px] font-black text-white tracking-tight",
+                    )}
+                  >
+                    EduPath
+                  </Text>
+                  <Text
+                    style={tw(
+                      "text-[10px] font-medium text-blue-300 mt-1 uppercase tracking-widest",
+                    )}
+                  >
+                    Laporan Analisis AI
+                  </Text>
+                </View>
+                <View style={tw("items-end")}>
+                  <Text style={tw("text-[14px] font-bold text-white")}>
+                    {fullName}
+                  </Text>
+                  <Text style={tw("text-[10px] text-slate-300 mt-1")}>
+                    {schoolName}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Score stats row inside banner */}
+              <View style={tw("flex flex-row gap-4 mt-2")}>
+                {[
+                  { label: "AVG SCIENCE", value: sainsScore, accent: false },
+                  { label: "AVG SOCIAL", value: sosialScore, accent: false },
+                  { label: "TOTAL SCORE", value: overallScore, accent: true },
+                ].map((stat, i) => (
+                  <View
+                    key={i}
+                    style={tw(
+                      `flex-1 rounded-xl p-3 items-center border ${
+                        stat.accent
+                          ? "bg-blue-600 border-blue-500"
+                          : "bg-white/10 border-white/10"
+                      }`,
+                    )}
+                  >
+                    <Text
+                      style={tw(
+                        `text-[8px] font-bold mb-1.5 ${stat.accent ? "text-blue-100" : "text-slate-400"}`,
+                      )}
+                    >
+                      {stat.label}
+                    </Text>
+                    <Text
+                      style={tw(
+                        stat.accent
+                          ? "text-[24px] font-extrabold text-white"
+                          : "text-[20px] font-extrabold text-slate-100",
+                      )}
+                    >
+                      {stat.value}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* ── BODY ── */}
+            <View style={tw("px-8 py-5")}>
+              {/* AI SUMMARY (Gaya Executive Quote) */}
+              <View
+                style={tw(
+                  "mb-5 p-4 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl",
+                )}
+                wrap={false}
+              >
+                <Text
+                  style={tw(
+                    "text-[10px] font-bold text-blue-800 uppercase tracking-widest mb-2",
+                  )}
+                >
+                  Ringkasan Eksekutif
+                </Text>
+                <Text
+                  style={tw(
+                    "text-[11px] text-slate-700 leading-relaxed font-medium",
+                  )}
+                >
+                  {aiSummary}
+                </Text>
+              </View>
+
+              {/* AI ANALYSIS — 3-Column Balanced Grid */}
+              <View style={tw("mb-5")} wrap={false}>
+                <Text
+                  style={tw(
+                    "text-[11px] font-extrabold text-slate-800 uppercase tracking-widest mb-3 border-b border-slate-200 pb-2",
+                  )}
+                >
+                  Detail Analisis Profil
+                </Text>
+
+                {/* Menggunakan flex-row dengan 3 kolom yang sama besar (flex-1) */}
+                <View style={tw("flex flex-row gap-4")}>
+                  {/* Kolom 1: Alasan Kesesuaian */}
+                  <View
+                    style={tw(
+                      "flex-1 bg-white border border-slate-200 rounded-xl p-4",
+                    )}
+                  >
+                    <Text
+                      style={tw(
+                        "text-[10px] font-bold text-blue-600 uppercase mb-2",
+                      )}
+                    >
+                      Alasan Kesesuaian
+                    </Text>
+                    <Text
+                      style={tw("text-[9.5px] text-slate-600 leading-relaxed")}
+                    >
+                      {alasanText}
+                    </Text>
+                  </View>
+
+                  {/* Kolom 2: Kekuatan Utama */}
+                  <View
+                    style={tw(
+                      "flex-1 bg-white border border-slate-200 rounded-xl p-4",
+                    )}
+                  >
+                    <Text
+                      style={tw(
+                        "text-[10px] font-bold text-indigo-600 uppercase mb-2",
+                      )}
+                    >
+                      Kekuatan Utama
+                    </Text>
+                    <Text
+                      style={tw("text-[9.5px] text-slate-600 leading-relaxed")}
+                    >
+                      {kekuatanText}
+                    </Text>
+                  </View>
+
+                  {/* Kolom 3: Saran Pengembangan */}
+                  <View
+                    style={tw(
+                      "flex-1 bg-white border border-slate-200 rounded-xl p-4",
+                    )}
+                  >
+                    <Text
+                      style={tw(
+                        "text-[10px] font-bold text-amber-600 uppercase mb-2",
+                      )}
+                    >
+                      Saran Pengembangan
+                    </Text>
+                    <Text
+                      style={tw("text-[9.5px] text-slate-600 leading-relaxed")}
+                    >
+                      {saranText}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* RADAR CHART */}
+              {chartImage && (
+                <View
+                  style={tw(
+                    "mb-5 bg-white border border-slate-200 rounded-xl p-4 items-center",
+                  )}
+                  wrap={false}
+                >
+                  <Text
+                    style={tw(
+                      "text-[11px] font-extrabold text-slate-800 uppercase tracking-widest mb-3 w-full text-center",
+                    )}
+                  >
+                    Peta Kemampuan Akademik
+                  </Text>
+                  <PdfImage
+                    src={chartImage}
+                    style={tw("w-[245px] h-auto object-contain")}
+                  />
+                </View>
+              )}
+
+              {/* TOP CAREERS (Desain Kartu Premium) */}
+              <View break>
+                <Text
+                  style={tw(
+                    "text-[11px] font-extrabold text-slate-800 uppercase tracking-widest mb-3 border-b border-slate-200 pb-2 pt-10",
+                  )}
+                >
+                  Rekomendasi Karir Utama
+                </Text>
+                <View style={tw("flex flex-row gap-4")}>
+                  {careers.slice(0, 2).map((career, i) => (
+                    <View
+                      key={i}
+                      style={tw(
+                        "flex-1 bg-white border border-blue-200 rounded-xl overflow-hidden",
+                      )}
+                      wrap={false}
+                    >
+                      {/* Card Header dengan warna latar */}
+                      <View
+                        style={tw(
+                          "bg-blue-50 border-b border-blue-100 px-4 py-3 flex flex-row justify-between items-center",
+                        )}
+                      >
+                        <Text
+                          style={tw("text-[10px] font-extrabold text-blue-800")}
+                        >
+                          Pilihan #{i + 1}
+                        </Text>
+                        <Text
+                          style={tw(
+                            "text-[9px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full",
+                          )}
+                        >
+                          {getMatchText(career.confidence_score)}
+                        </Text>
+                      </View>
+
+                      {/* Card Body */}
+                      <View style={tw("p-4")}>
+                        <Text
+                          style={tw(
+                            "text-[14px] font-extrabold text-slate-800 mb-2 leading-tight",
+                          )}
+                        >
+                          {career.career_name}
+                        </Text>
+                        <Text
+                          style={tw(
+                            "text-[10px] text-slate-600 leading-relaxed mb-4",
+                          )}
+                        >
+                          {career.description}
+                        </Text>
+
+                        {career.related_majors &&
+                          career.related_majors.length > 0 && (
+                            <View>
+                              <Text
+                                style={tw(
+                                  "text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5",
+                                )}
+                              >
+                                Jurusan Terkait
+                              </Text>
+                              <View
+                                style={tw("flex flex-row flex-wrap gap-1.5")}
+                              >
+                                {career.related_majors.map((major, j) => (
+                                  <Text
+                                    key={j}
+                                    style={tw(
+                                      "text-[9px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200",
+                                    )}
+                                  >
+                                    {major.major_name}
+                                  </Text>
+                                ))}
+                              </View>
+                            </View>
+                          )}
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                {/* ADDITIONAL CAREERS */}
+                {careers.length > 2 && (
+                  <View style={tw("mt-6")}>
+                    <Text
+                      style={tw(
+                        "text-[11px] font-extrabold text-slate-800 uppercase tracking-widest mb-3 border-b border-slate-200 pb-2",
+                      )}
+                    >
+                      Jalur Karir Potensial Lainnya
+                    </Text>
+                    <View style={tw("flex flex-col gap-3")}>
+                      {careers.slice(2, 6).map((career, i) => (
+                        <View
+                          key={i}
+                          style={tw(
+                            "flex flex-row bg-white border border-slate-200 rounded-xl p-4 items-start",
+                          )}
+                          wrap={false}
+                        >
+                          <View style={tw("flex-1 pr-4")}>
+                            <View
+                              style={tw("flex flex-row items-center mb-1.5")}
+                            >
+                              <Text
+                                style={tw(
+                                  "text-[10px] font-bold text-slate-400 mr-2",
+                                )}
+                              >
+                                #{i + 3}
+                              </Text>
+                              <Text
+                                style={tw(
+                                  "text-[12px] font-extrabold text-slate-800",
+                                )}
+                              >
+                                {career.career_name}
+                              </Text>
+                            </View>
+                            <Text
+                              style={tw(
+                                "text-[9.5px] text-slate-500 leading-relaxed mb-2",
+                              )}
+                            >
+                              {career.description}
+                            </Text>
+                            <View>
+                              <Text
+                                style={tw(
+                                  "text-[8.5px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded self-start",
+                                )}
+                              >
+                                {getMatchText(career.confidence_score)}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {career.related_majors &&
+                            career.related_majors.length > 0 && (
+                              <View
+                                style={tw(
+                                  "w-[35%] pl-4 border-l border-slate-200",
+                                )}
+                              >
+                                <Text
+                                  style={tw(
+                                    "text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2",
+                                  )}
+                                >
+                                  Jurusan Terkait
+                                </Text>
+                                <View
+                                  style={tw("flex flex-row flex-wrap gap-1.5")}
+                                >
+                                  {career.related_majors.map((major, j) => (
+                                    <Text
+                                      key={j}
+                                      style={tw(
+                                        "text-[8.5px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-1 rounded",
+                                      )}
+                                    >
+                                      {major.major_name}
+                                    </Text>
+                                  ))}
+                                </View>
+                              </View>
+                            )}
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* ── FOOTER ── */}
+            <View
+              style={tw(
+                "absolute bottom-0 left-0 right-0 px-8 py-5 flex flex-row justify-between items-center border-t border-slate-200 bg-white",
+              )}
+              fixed
+            >
+              <Text
+                style={tw(
+                  "text-[9px] font-medium text-slate-400 uppercase tracking-widest",
+                )}
+              >
+                EduPath — Laporan Resmi
+              </Text>
+              <Text
+                style={tw("text-[9px] font-bold text-slate-400")}
+                render={({ pageNumber, totalPages }) =>
+                  `Halaman ${pageNumber} / ${totalPages}`
+                }
+              />
+            </View>
+          </Page>
+        </Document>
+      );
+
+      const blob = await pdf(<ResultPDF />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Laporan_Edupath_${fullName.replace(/\s+/g, "_")}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Gagal membuat PDF:", error);
+      alert("Gagal mengunduh PDF. Silakan coba lagi.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const isTrue = (value) =>
@@ -188,6 +678,33 @@ function ResultPage({
 
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-800 pb-16 pt-8 flex flex-col">
+      {/* ========================================================= */}
+      {/* GHOST CHART KHUSUS UNTUK PDF (Selalu berukuran Desktop) */}
+      {/* ========================================================= */}
+      <div style={{ position: "absolute", top: "-9999px", left: "-9999px", opacity: 0 }}>
+        <div id="pdf-ghost-chart" style={{ width: "600px", height: "450px", background: "white", padding: "20px" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+              <PolarGrid stroke="#e2e8f0" />
+              <PolarAngleAxis
+                dataKey="subject"
+                tick={{ fill: "#475569", fontSize: 13, fontWeight: 600 }}
+              />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+              <Radar
+                name="Skor"
+                dataKey="A"
+                stroke="#2563eb"
+                strokeWidth={2.5}
+                fill="#3b82f6"
+                fillOpacity={0.2}
+                isAnimationActive={false}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* Tombol Kembali */}
       <div className="max-w-6xl mx-1 lg:mx-14 px-6 mb-6 print:hidden">
         <button
@@ -281,7 +798,7 @@ function ResultPage({
                     <RadarChart
                       cx="50%"
                       cy="50%"
-                      outerRadius="70%" // Anda bisa mengembalikan radius ke ukuran aslinya
+                      outerRadius="60%" // Anda bisa mengembalikan radius ke ukuran aslinya
                       data={radarData}
                       margin={{ top: 20, right: 30, bottom: 20, left: 30 }} // Tambahkan sedikit margin tepi
                     >
@@ -608,14 +1125,12 @@ function ResultPage({
 
               <div className="p-2">
                 <button
-                  onClick={() =>
-                    setOpenAccordion(openAccordion === "alasan" ? "" : "alasan")
-                  }
+                  onClick={() => toggleAccordion("alasan")}
                   className="w-full text-left p-3 flex justify-between items-center text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg outline-none"
                 >
                   Alasan Kesesuaian
                   <svg
-                    className={`w-4 h-4 transition-transform ${openAccordion === "alasan" ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform ${openAccordions.alasan ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -628,23 +1143,19 @@ function ResultPage({
                     ></path>
                   </svg>
                 </button>
-                {openAccordion === "alasan" && (
+                {openAccordions.alasan && (
                   <div className="px-3 pb-3 text-xs text-slate-500 leading-relaxed">
                     {alasanText}
                   </div>
                 )}
 
                 <button
-                  onClick={() =>
-                    setOpenAccordion(
-                      openAccordion === "kekuatan" ? "" : "kekuatan",
-                    )
-                  }
+                  onClick={() => toggleAccordion("kekuatan")}
                   className="w-full text-left p-3 flex justify-between items-center text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg outline-none"
                 >
                   Kekuatan Utama
                   <svg
-                    className={`w-4 h-4 transition-transform ${openAccordion === "kekuatan" ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform ${openAccordions.kekuatan ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -657,21 +1168,19 @@ function ResultPage({
                     ></path>
                   </svg>
                 </button>
-                {openAccordion === "kekuatan" && (
+                {openAccordions.kekuatan && (
                   <div className="px-3 pb-3 text-xs text-slate-500 leading-relaxed">
                     {kekuatanText}
                   </div>
                 )}
 
                 <button
-                  onClick={() =>
-                    setOpenAccordion(openAccordion === "saran" ? "" : "saran")
-                  }
+                  onClick={() => toggleAccordion("saran")}
                   className="w-full text-left p-3 flex justify-between items-center text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg outline-none"
                 >
                   Saran Pengembangan
                   <svg
-                    className={`w-4 h-4 transition-transform ${openAccordion === "saran" ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform ${openAccordions.saran ? "rotate-180" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -684,7 +1193,7 @@ function ResultPage({
                     ></path>
                   </svg>
                 </button>
-                {openAccordion === "saran" && (
+                {openAccordions.saran && (
                   <div className="px-3 pb-3 text-xs text-slate-500 leading-relaxed">
                     {saranText}
                   </div>
@@ -814,22 +1323,32 @@ function ResultPage({
               <div className="space-y-2.5">
                 <button
                   onClick={handleDownloadPDF}
-                  className="w-full py-2.5 px-4 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 text-xs font-bold rounded-xl transition flex justify-center items-center"
+                  disabled={isGeneratingPDF}
+                  className={`w-full py-2.5 px-4 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 text-xs font-bold rounded-xl transition flex justify-center items-center ${isGeneratingPDF ? "opacity-70 cursor-not-allowed" : ""}`}
                 >
                   <svg
-                    className="w-4 h-4 mr-2"
+                    className={`w-4 h-4 mr-2 ${isGeneratingPDF ? "animate-spin" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                    ></path>
+                    {isGeneratingPDF ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      ></path>
+                    ) : (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      ></path>
+                    )}
                   </svg>
-                  Unduh Laporan PDF
+                  {isGeneratingPDF ? "Membuat PDF..." : "Unduh Laporan PDF"}
                 </button>
                 <button
                   onClick={onRetry}
