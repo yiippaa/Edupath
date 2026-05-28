@@ -22,7 +22,11 @@ function LandingPage({
       if (fullName) {
         // Mengambil nama depan
         const nameParts = fullName.trim().split(" ");
-        setFirstName(`${nameParts[0]} ${nameParts[1]}`);
+        setFirstName(
+          nameParts.length > 1
+            ? `${nameParts[0]} ${nameParts[1]}`
+            : nameParts[0]
+        );
 
         // Membuat inisial
         const ini =
