@@ -228,12 +228,13 @@ function PsychometricForm({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100 transition-all">
-          <div className="flex justify-center mb-6">
-            {/* Animasi Spinner Kecil */}
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="w-full max-w-lg flex flex-col items-center text-center transition-all z-10 px-4">
+          <div className="flex justify-center mb-6 md:mb-8 relative">
+            <div className="absolute inset-0 bg-blue-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
+            {/* Animasi Spinner */}
             <svg
-              className="w-12 h-12 text-blue-600 animate-spin"
+              className="w-12 h-12 md:w-16 md:h-16 text-blue-600 animate-spin relative z-10"
               fill="none"
               viewBox="0 0 24 24"
             >
@@ -253,21 +254,21 @@ function PsychometricForm({
             </svg>
           </div>
 
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-2 md:mb-3 tracking-tight">
             Memproses Data
           </h2>
-          <p className="text-slate-500 text-sm mb-8 h-5 font-medium">
+          <p className="text-slate-500 text-sm md:text-base mb-8 md:mb-10 h-6 font-medium">
             {loadingText}
           </p>
 
-          <div className="w-full bg-slate-100 rounded-full h-3 mb-3 overflow-hidden relative">
+          <div className="w-full bg-slate-200 rounded-full h-2 md:h-2.5 mb-2 md:mb-3 overflow-hidden relative">
             <div
-              className="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
+              className="bg-blue-600 h-2 md:h-2.5 rounded-full transition-all duration-700 ease-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
 
-          <div className="text-right text-sm font-bold text-blue-600">
+          <div className="text-xs md:text-sm font-bold text-blue-600 tracking-wide w-full text-right">
             {progress}%
           </div>
         </div>
