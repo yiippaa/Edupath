@@ -284,24 +284,50 @@ function LandingPage() {
               </button>
             </div>
           ) : (
-            <div className="pt-2 flex flex-col gap-2">
+            <div className="pt-2">
               <button
                 onClick={() => {
                   navigate("/login");
                   setIsMenuOpen(false);
                 }}
-                className="w-full text-center bg-primary hover:bg-primary-container text-on-primary font-bold py-3 rounded-xl transition cursor-pointer"
+                className="w-full flex items-center gap-3 py-2 px-3 hover:bg-slate-100 rounded-xl transition text-left cursor-pointer"
               >
-                Log In
-              </button>
-              <button
-                onClick={() => {
-                  navigate("/register");
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-center bg-surface-white text-primary border-2 border-primary font-bold py-3 rounded-xl transition hover:bg-slate-50 cursor-pointer"
-              >
-                Register
+                <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white text-slate-400 flex items-center justify-center font-bold shadow-sm shrink-0">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    ></path>
+                  </svg>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-slate-800 leading-none mb-1">
+                    Belum Masuk
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    Masuk ke akun Anda
+                  </span>
+                </div>
+                <svg
+                  className="w-5 h-5 text-slate-400 ml-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
               </button>
             </div>
           )}
