@@ -133,7 +133,7 @@ function AssessmentForm() {
               </svg>
             </button>
           </div>
-          <div className="font-h2 text-h2 text-blue-700 tracking-tight font-bold text-center text-xl">
+          <div className="font-h2 text-h2 text-primary tracking-tight font-bold text-center text-xl">
             EduPath
           </div>
           <div className="flex-1 flex justify-end">
