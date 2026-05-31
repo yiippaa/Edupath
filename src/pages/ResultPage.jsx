@@ -50,6 +50,12 @@ const tw = createTw({
           900: "#0f172a",
         },
         green: { 100: "#dcfce3", 700: "#15803d" },
+        amber: {
+          50: "#fffbeb",
+          100: "#fef3c7",
+          200: "#fde68a",
+          800: "#92400e",
+        },
       },
     },
   },
@@ -624,6 +630,19 @@ function ResultPage() {
                     </View>
                   </View>
                 )}
+
+                {/* Disclaimer */}
+                <View
+                  style={tw(
+                    "mt-6 p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex flex-row items-start gap-2",
+                  )}
+                  wrap={false}
+                >
+                  <Text style={tw("text-amber-800 text-[9.5px] leading-relaxed flex-1")}>
+                    <Text style={tw("font-bold")}>Pemberitahuan: </Text>
+                    Rekomendasi ini dibuat berdasarkan data akademik dan dapat digunakan sebagai referensi. Keputusan akhir tetap berada pada pengguna, orang tua, atau pihak pembimbing.
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -1083,6 +1102,26 @@ function ResultPage() {
                   </button>
                 </div>
               )}
+
+              {/* Disclaimer */}
+              <div className="mt-6 p-4 bg-amber-50/60 border border-amber-200/80 rounded-xl flex items-start gap-3">
+                <svg
+                  className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div className="text-xs text-amber-800 leading-relaxed text-left">
+                  <span className="font-bold">Pemberitahuan:</span> Rekomendasi ini dibuat berdasarkan data akademik dan dapat digunakan sebagai referensi. Keputusan akhir tetap berada pada pengguna, orang tua, atau pihak pembimbing.
+                </div>
+              </div>
             </div>
           </div>
 
