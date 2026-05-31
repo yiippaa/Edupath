@@ -313,9 +313,13 @@ function PsychometricForm() {
               </svg>
             </button>
           </div>
-          <div className="font-h2 text-h2 text-primary tracking-tight font-bold text-center text-xl">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="font-h2 text-h2 text-primary tracking-tight font-bold text-center text-xl cursor-pointer hover:opacity-80 transition-opacity"
+          >
             EduPath
-          </div>
+          </button>
           <div className="flex-1 flex justify-end">
             <div
               onClick={() => navigate("/profile")}

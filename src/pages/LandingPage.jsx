@@ -112,9 +112,13 @@ function LandingPage() {
       <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md transition-all duration-300 ease-in-out border-b border-slate-100">
         <div className="flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto">
           <div className="flex justify-between gap-10">
-            <div className="font-h2 text-h2 text-primary tracking-tight font-bold">
+            <button
+              type="button"
+              onClick={(e) => handleScrollTo(e, "top")}
+              className="font-h2 text-h2 text-primary tracking-tight font-bold cursor-pointer hover:opacity-85 transition-opacity text-left"
+            >
               EduPath
-            </div>
+            </button>
             <nav className="hidden md:flex items-center space-x-8 font-body-md text-body-md">
               <a
                 className="text-text-secondary dark:text-on-surface-variant hover:text-primary transition-colors"
