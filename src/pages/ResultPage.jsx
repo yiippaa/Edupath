@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssessment } from "../context/AssessmentContext";
 import {
   Radar,
   RadarChart,
@@ -53,14 +55,29 @@ const tw = createTw({
   },
 });
 
-function ResultPage({
-  onRetry,
-  onBack,
-  resultData,
-  academicData,
-  behavioralData,
-}) {
+function ResultPage() {
+  const navigate = useNavigate();
+  const {
+    resultData,
+    academicData,
+    behavioralData,
+    resultSource,
+    clearAssessmentSession,
+  } = useAssessment();
   const finalData = resultData?.data || resultData;
+
+  const handleBack = () => {
+    if (resultSource === "history") {
+      navigate("/profile");
+    } else {
+      navigate("/");
+    }
+  };
+
+  const handleRetry = () => {
+    clearAssessmentSession();
+    navigate("/assessment/step1");
+  };
 
   const [openAccordions, setOpenAccordions] = useState({
     alasan: true,
@@ -708,7 +725,7 @@ function ResultPage({
       {/* Tombol Kembali */}
       <div className="max-w-6xl mx-1 lg:mx-14 px-6 mb-6 print:hidden">
         <button
-          onClick={onBack}
+          onClick={handleBack}
           className="text-slate-500 hover:text-blue-600 font-medium flex items-center transition text-md"
         >
           <svg
@@ -1351,7 +1368,7 @@ function ResultPage({
                   {isGeneratingPDF ? "Membuat PDF..." : "Unduh Laporan PDF"}
                 </button>
                 <button
-                  onClick={onRetry}
+                  onClick={handleRetry}
                   className="w-full py-2.5 px-4 bg-white border border-slate-300 hover:border-blue-500 hover:text-blue-600 text-slate-700 text-xs font-bold rounded-xl transition flex justify-center items-center"
                 >
                   <svg

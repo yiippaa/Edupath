@@ -1,26 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-// IMPORT FETCH OTOMATIS & LOADING PAGE
+import { useNavigate } from "react-router-dom";
+import { useAssessment } from "../context/AssessmentContext";
 import { fetchWithAuth } from "../Utils/auth";
 
-function PsychometricForm({
-  onBack,
-  academicData,
-  onSubmitSuccess,
-  onProfileClick,
-  savedBehavioral,
-  onSaveBehavioral,
-}) {
+function PsychometricForm() {
+  const navigate = useNavigate();
+  const {
+    academicData,
+    behavioralData,
+    setBehavioralData,
+    setResultData,
+    setResultSource,
+  } = useAssessment();
+
   const [studyHours, setStudyHours] = useState(
-    savedBehavioral?.studyHours ?? 10,
+    behavioralData?.studyHours ?? 10,
   );
   const [absentDays, setAbsentDays] = useState(
-    savedBehavioral?.absentDays ?? "",
+    behavioralData?.absentDays ?? "",
   );
   const [partTimeJob, setPartTimeJob] = useState(
-    savedBehavioral?.partTimeJob ?? "No",
+    behavioralData?.partTimeJob ?? "No",
   );
   const [extracurricular, setExtracurricular] = useState(
-    savedBehavioral?.extracurricular ?? "No",
+    behavioralData?.extracurricular ?? "No",
   );
 
   const [isLoading, setIsLoading] = useState(false);
@@ -38,17 +41,19 @@ function PsychometricForm({
   }, []);
 
   const handleGoBack = (target) => {
-    // 1. Simpan data yang sedang diisi ke App.jsx sebelum pindah
-    if (onSaveBehavioral) {
-      onSaveBehavioral({
-        studyHours,
-        absentDays,
-        partTimeJob,
-        extracurricular,
-      });
-    }
+    // 1. Simpan data yang sedang diisi ke Context sebelum pindah
+    setBehavioralData({
+      studyHours,
+      absentDays,
+      partTimeJob,
+      extracurricular,
+    });
     // 2. Eksekusi perpindahan halaman
-    if (onBack) onBack(target);
+    if (target === "home") {
+      navigate("/");
+    } else {
+      navigate("/assessment/step1");
+    }
   };
 
   useEffect(() => {
@@ -126,7 +131,10 @@ function PsychometricForm({
       setLoadingText("Selesai! Mengalihkan ke halaman hasil...");
 
       setTimeout(() => {
-        if (onSubmitSuccess) onSubmitSuccess(finalResult, payload);
+        setResultData(finalResult);
+        setBehavioralData(payload);
+        setResultSource("form");
+        navigate("/result");
       }, 1000);
     } catch (error) {
       console.warn("API Backend gagal. Menggunakan simulasi lokal.");
@@ -197,8 +205,11 @@ function PsychometricForm({
           },
         };
         setTimeout(() => {
-          if (onSubmitSuccess) onSubmitSuccess(mockAPIResponse, payload);
+          setResultData(mockAPIResponse);
+          setBehavioralData(payload);
+          setResultSource("form");
           setIsLoading(false);
+          navigate("/result");
         }, 800);
       }, 3500);
     }
@@ -306,7 +317,7 @@ function PsychometricForm({
           </div>
           <div className="flex-1 flex justify-end">
             <div
-              onClick={onProfileClick}
+              onClick={() => navigate("/profile")}
               className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition"
               title="Lihat Profil"
             >

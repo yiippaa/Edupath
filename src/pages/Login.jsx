@@ -1,41 +1,37 @@
 import React, { useState } from "react";
-import iconRegister from "../assets/register.png";
+import { useNavigate } from "react-router-dom";
+import { useAssessment } from "../context/AssessmentContext";
+import iconLogin from "../assets/login.png";
 
-function Register({ onRegisterSuccess, onLoginClick, onBack }) {
-  const [formData, setFormData] = useState({
-    full_name: "",
-    school_name: "",
-    email: "",
-    password: "",
-  });
+function Login() {
+  const navigate = useNavigate();
+  const { clearAssessmentSession } = useAssessment();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRegister = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg("");
 
     try {
       const response = await fetch(
-        "https://edupath-backend.vercel.app/api/v1/auth/register",
+        "https://edupath-backend.vercel.app/api/v1/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(formData),
+          body: JSON.stringify({ email, password }),
         },
       );
 
       const result = await response.json();
 
       if (!result.success) {
-        let errorMessage = "Gagal mendaftar.";
+        let errorMessage = "Terjadi kesalahan sistem.";
         if (
           result.error?.code === "VALIDATION_ERROR" &&
           Array.isArray(result.error.details)
@@ -51,22 +47,30 @@ function Register({ onRegisterSuccess, onLoginClick, onBack }) {
         throw new Error(errorMessage);
       }
 
-      if (result.data?.full_name)
-        localStorage.setItem("user_name", result.data.full_name);
-      if (result.data?.school_name)
-        localStorage.setItem("user_school", result.data.school_name);
+      const token = result.data?.access_token;
+      const userData = result.data?.user;
 
-      if (onRegisterSuccess) onRegisterSuccess();
+      if (token) {
+        localStorage.setItem("user_token", token);
+        if (userData?.full_name)
+          localStorage.setItem("user_name", userData.full_name);
+        if (userData?.school_name)
+          localStorage.setItem("user_school", userData.school_name);
+        clearAssessmentSession();
+        navigate("/");
+      } else {
+        throw new Error("Gagal mendapatkan akses token dari server.");
+      }
     } catch (error) {
       setErrorMsg(error.message);
-      // Matikan loading HANYA JIKA ERROR
+      // Matikan loading HANYA JIKA ERROR. Jika sukses, biarkan berputar sampai pindah halaman.
       setIsLoading(false);
     }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-      e.preventDefault();
+      e.preventDefault(); // Mencegah kursor melompat ke awal/akhir teks
       const form = e.target.closest("form");
       const inputs = Array.from(form.querySelectorAll("input"));
       const index = inputs.indexOf(e.target);
@@ -86,22 +90,21 @@ function Register({ onRegisterSuccess, onLoginClick, onBack }) {
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md animate-fadeIn">
           <div className="w-14 h-14 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-5 shadow-lg"></div>
           <h2 className="text-2xl font-extrabold text-slate-800 mb-1 tracking-tight">
-            Mendaftarkan Akun...
+            Sedang Masuk...
           </h2>
           <p className="text-slate-500 font-medium">
-            Menyiapkan profil EduPath Anda
+            Memverifikasi data otentikasi Anda
           </p>
         </div>
       )}
 
       {/* KARTU UTAMA */}
       <div className="bg-white w-full max-w-5xl flex flex-col lg:flex-row rounded-2xl shadow-2xl overflow-hidden min-h-150">
-        {/* SISI KIRI: Formulir Pendaftaran */}
+        {/* SISI KIRI: Form Login */}
         <div className="w-full lg:w-1/2 p-8 sm:p-12 md:p-16 flex flex-col justify-center relative">
-          {/* Tombol Kembali */}
           <div className="absolute top-6 left-6 md:top-8 md:left-8">
             <button
-              onClick={onBack}
+              onClick={() => navigate("/")}
               className="text-slate-400 hover:text-blue-600 font-bold flex items-center transition text-sm"
             >
               <svg
@@ -122,9 +125,8 @@ function Register({ onRegisterSuccess, onLoginClick, onBack }) {
           </div>
 
           <div className="mt-8">
-            {/* Judul Form */}
             <div className="mb-8 relative inline-block">
-              <h2 className="text-3xl font-bold text-slate-900">Daftar Akun</h2>
+              <h2 className="text-3xl font-bold text-slate-900">Masuk</h2>
               <div className="h-1 w-12 bg-blue-600 mt-2 rounded-full"></div>
             </div>
 
@@ -145,57 +147,28 @@ function Register({ onRegisterSuccess, onLoginClick, onBack }) {
               </div>
             )}
 
-            <form onSubmit={handleRegister} className="space-y-5">
-              <div>
-                <input
-                  type="text"
-                  name="full_name"
-                  required
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Nama Lengkap (Contoh: Budi Santoso)"
-                  className="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50 focus:bg-white text-xs md:text-sm"
-                />
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  name="school_name"
-                  required
-                  value={formData.school_name}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Asal Sekolah (Contoh: SMAN 1 Jakarta)"
-                  className="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50 focus:bg-white text-xs md:text-sm"
-                />
-              </div>
-
+            <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <input
                   type="email"
-                  name="email"
                   required
-                  value={formData.email}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Alamat Email (Contoh: budi@email.com)"
-                  className="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50 focus:bg-white text-xs md:text-sm"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={handleKeyDown} // <--- TAMBAHKAN DI SINI
+                  placeholder="Email (budi@example.com)"
+                  className="w-full px-4 py-3.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50 focus:bg-white text-sm"
                 />
               </div>
 
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="password"
                   required
-                  value={formData.password}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  minLength="8"
-                  placeholder="Password (Minimal 8 karakter)"
-                  className="w-full px-4 py-3.5 pr-12 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50 focus:bg-white text-xs md:text-sm"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown} // <--- TAMBAHKAN DI SINI
+                  placeholder="Password"
+                  className="w-full px-4 py-3.5 pr-12 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50 focus:bg-white text-sm"
                 />
                 <button
                   type="button"
@@ -246,41 +219,40 @@ function Register({ onRegisterSuccess, onLoginClick, onBack }) {
                 disabled={isLoading}
                 className={`w-full text-white font-bold py-3.5 rounded-xl shadow-md transition mt-2 text-sm ${isLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
               >
-                {isLoading ? "Memproses..." : "Daftar Sekarang"}
+                {isLoading ? "Memproses..." : "Masuk Sekarang"}
               </button>
             </form>
 
             <div className="mt-8 text-center text-sm font-medium text-slate-500">
-              Sudah punya akun?{" "}
+              Belum punya akun?{" "}
               <button
-                onClick={onLoginClick}
+                onClick={() => navigate("/register")}
                 className="text-blue-600 hover:text-blue-800 hover:underline font-bold transition"
               >
-                Masuk di sini
+                Daftar di sini
               </button>
             </div>
           </div>
         </div>
 
-        {/* SISI KANAN: Gambar dengan Overlay Warna */}
-
+        {/* SISI KANAN: Gambar Ilustrasi */}
         <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 text-center overflow-hidden bg-transparent">
           <img
-            src={iconRegister}
-            alt="EduPath Illustration"
+            src={iconLogin}
+            alt="login icon"
             className="absolute inset-auto w-auto h-auto"
           />
-          <div className="absolute inset-0 z-10"></div>
+          <div className="absolute inset-0 mix-blend-multiply z-10"></div>
           <div className="absolute inset-0 bg-linear-to-t from-indigo-900/90 to-transparent z-10"></div>
 
           <div className="relative z-20 space-y-4">
             <h3 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
-              Setiap langkah kecil
+              Senang bertemu
               <br />
-              adalah awal yang besar.
+              kembali!
             </h3>
             <p className="text-blue-100 text-lg font-medium">
-              Mari rancang masa depanmu.
+              Lanjutkan petualangan pendidikanmu.
             </p>
           </div>
         </div>
@@ -289,4 +261,4 @@ function Register({ onRegisterSuccess, onLoginClick, onBack }) {
   );
 }
 
-export default Register;
+export default Login;

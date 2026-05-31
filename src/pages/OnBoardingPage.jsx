@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import icon from "../assets/education.png";
 
-function OnboardingPage({ onNext, onBack, onProfileClick }) {
+function OnboardingPage() {
+  const navigate = useNavigate();
   const subjects = [
     "Matematika",
     "Fisika",
@@ -162,7 +164,7 @@ function OnboardingPage({ onNext, onBack, onProfileClick }) {
   };
 
   const handleSubmit = () => {
-    if (onNext) onNext();
+    navigate("/assessment/step1");
   };
 
   return (
@@ -172,7 +174,7 @@ function OnboardingPage({ onNext, onBack, onProfileClick }) {
         <div className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
           <div className="flex-1 flex items-center">
             <button
-              onClick={onBack}
+              onClick={() => navigate("/")}
               className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-semibold"
             >
               <svg
@@ -195,7 +197,7 @@ function OnboardingPage({ onNext, onBack, onProfileClick }) {
           </div>
           <div className="flex-1 flex justify-end">
             <div
-              onClick={onProfileClick}
+              onClick={() => navigate("/profile")}
               className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition"
               title="Lihat Profil"
             >

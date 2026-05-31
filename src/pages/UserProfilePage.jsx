@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssessment } from "../context/AssessmentContext";
 import { fetchWithAuth, handleLogout as backendLogout } from "../Utils/auth";
 
-function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
+function UserProfilePage() {
+  const navigate = useNavigate();
+  const {
+    setAcademicData,
+    setResultData,
+    setBehavioralData,
+    setResultSource,
+    clearAssessmentSession,
+  } = useAssessment();
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingText, setLoadingText] = useState("Memuat Profile...");
@@ -129,9 +139,11 @@ function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
         extracurricular: assData.data.extracurricular,
       };
 
-      if (onNavigateToResult) {
-        onNavigateToResult(recData, academicData, behavioralData);
-      }
+      setResultData(recData);
+      setAcademicData(academicData);
+      setBehavioralData(behavioralData);
+      setResultSource("history");
+      navigate("/result");
     } catch (error) {
       console.error(error);
       alert("Gagal memuat hasil asesmen.");
@@ -218,10 +230,10 @@ function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
     }
   };
 
-  // MENGGUNAKAN FUNGSI LOGOUT DARI authUtils
   const handleLogoutClick = () => {
     backendLogout(() => {
-      if (onLogout) onLogout(); // Panggil fungsi transisi halaman dari App.jsx
+      clearAssessmentSession();
+      navigate("/");
     });
   };
 
@@ -260,7 +272,7 @@ function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
         <div className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
           <div className="flex-1 flex items-center">
             <button
-              onClick={onBack}
+              onClick={() => navigate("/")}
               className="flex items-center gap-2 text-slate-600 hover:text-primary transition font-semibold"
             >
               <svg
@@ -464,10 +476,29 @@ function UserProfilePage({ onBack, onLogout, onNavigateToResult }) {
               <h3 className="font-bold text-slate-700 mb-1">
                 Belum Ada Riwayat
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 mb-4">
                 Kamu belum pernah menyelesaikan asesmen. Mulai asesmen pertamamu
                 sekarang!
               </p>
+              <button
+                onClick={() => navigate("/onboarding")}
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-all text-xs cursor-pointer"
+              >
+                Mulai Asesmen Sekarang
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

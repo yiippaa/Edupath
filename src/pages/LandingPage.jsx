@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import LandingPageIlustration from "../assets/ilustration1.png";
 
-function LandingPage({
-  onStart,
-  onLoginClick,
-  onRegisterClick,
-  onProfileClick,
-}) {
+function LandingPage() {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [initials, setInitials] = useState("");
@@ -75,7 +72,7 @@ function LandingPage({
           <div className="flex items-center">
             {isLoggedIn ? (
               <button
-                onClick={onProfileClick}
+                onClick={() => navigate("/profile")}
                 className="flex items-center gap-3 hover:bg-slate-200 p-1.5 lg:pl-4 rounded-full transition group"
               >
                 <span className="font-bold text-slate-700 hidden md:block">
@@ -87,7 +84,7 @@ function LandingPage({
               </button>
             ) : (
               <button
-                onClick={onLoginClick}
+                onClick={() => navigate("/login")}
                 className="flex items-center gap-2 hover:bg-slate-200 p-2 rounded-full transition text-slate-600 font-medium"
                 title="Log In"
               >
@@ -128,7 +125,7 @@ function LandingPage({
             <div className="pt-4 flex flex-wrap gap-4">
               {isLoggedIn ? (
                 <button
-                  onClick={onStart}
+                  onClick={() => navigate("/onboarding")}
                   className="bg-primary hover:bg-primary-container text-on-primary font-bold py-4 px-10 rounded-full shadow-lg transition-all flex items-center gap-2 group cursor-pointer"
                 >
                   Mulai Asesmen Sekarang
@@ -145,13 +142,13 @@ function LandingPage({
               ) : (
                 <>
                   <button
-                    onClick={onLoginClick}
+                    onClick={() => navigate("/login")}
                     className="bg-primary hover:bg-primary-container text-on-primary font-bold py-4 px-10 rounded-full shadow-lg transition-all cursor-pointer"
                   >
                     Log In
                   </button>
                   <button
-                    onClick={onRegisterClick}
+                    onClick={() => navigate("/register")}
                     className="bg-surface-white text-primary border-2 border-primary font-bold py-4 px-10 rounded-full shadow-sm hover:bg-surface-container-low transition-all cursor-pointer"
                   >
                     Register

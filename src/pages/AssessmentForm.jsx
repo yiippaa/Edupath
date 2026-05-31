@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAssessment } from "../context/AssessmentContext";
 
-function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
+function AssessmentForm() {
+  const navigate = useNavigate();
+  const { academicData, setAcademicData } = useAssessment();
   const subjects = [
     "Matematika",
     "Fisika",
@@ -12,8 +16,8 @@ function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
   ];
 
   const [grades, setGrades] = useState(() => {
-    if (initialGrades && Object.keys(initialGrades).length > 0) {
-      return initialGrades;
+    if (academicData && Object.keys(academicData).length > 0) {
+      return academicData;
     }
     return subjects.reduce((acc, subject) => {
       acc[subject] = "";
@@ -70,7 +74,8 @@ function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
     }
 
     console.log("Data Nilai:", grades);
-    if (onNext) onNext(grades);
+    setAcademicData(grades);
+    navigate("/assessment/step2");
   };
 
   const inputRefs = useRef([]);
@@ -110,7 +115,7 @@ function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
         <div className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
           <div className="flex-1 flex items-center">
             <button
-              onClick={onBack}
+              onClick={() => navigate("/onboarding")}
               className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition font-semibold"
             >
               <svg
@@ -133,7 +138,7 @@ function AssessmentForm({ onNext, onBack, onProfileClick, initialGrades }) {
           </div>
           <div className="flex-1 flex justify-end">
             <div
-              onClick={onProfileClick}
+              onClick={() => navigate("/profile")}
               className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-blue-700 transition"
               title="Lihat Profil"
             >
