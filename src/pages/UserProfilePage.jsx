@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAssessment } from "../context/AssessmentContext";
 import { fetchWithAuth, handleLogout as backendLogout } from "../Utils/auth";
+import { API_URL } from "../config";
 
 function UserProfilePage() {
   const navigate = useNavigate();
@@ -37,9 +38,7 @@ function UserProfilePage() {
     setErrorMsg("");
     try {
       // MENGGUNAKAN fetchWithAuth (Otomatis handle Bearer Token & Refresh Token)
-      const response = await fetchWithAuth(
-        "https://edupath-backend.vercel.app/api/v1/profiles/me",
-      );
+      const response = await fetchWithAuth(`${API_URL}/profiles/me`);
       const result = await response.json();
 
       if (!result.success)
@@ -60,9 +59,7 @@ function UserProfilePage() {
   const fetchAssessmentHistory = async () => {
     setIsLoadingHistory(true);
     try {
-      const response = await fetchWithAuth(
-        "https://edupath-backend.vercel.app/api/v1/assessments",
-      );
+      const response = await fetchWithAuth(`${API_URL}/assessments`);
       const result = await response.json();
 
       if (result.success && result.data) {
@@ -89,9 +86,7 @@ function UserProfilePage() {
     setLoadingText("Memuat Detail Hasil...");
     setIsLoading(true);
     try {
-      const assRes = await fetchWithAuth(
-        `https://edupath-backend.vercel.app/api/v1/assessments/${item.assessment_id}`,
-      );
+      const assRes = await fetchWithAuth(`${API_URL}/assessments/${item.assessment_id}`);
       const assData = await assRes.json();
 
       if (!assData.success) throw new Error("Gagal mengambil detail asesmen");
@@ -100,7 +95,7 @@ function UserProfilePage() {
 
       if (!recommendationId) {
         const predictRes = await fetchWithAuth(
-          "https://edupath-backend.vercel.app/api/v1/recommendations/predict",
+          `${API_URL}/recommendations/predict`,
           {
             method: "POST",
             body: JSON.stringify({ assessment_id: item.assessment_id }),
@@ -115,9 +110,7 @@ function UserProfilePage() {
       if (!recommendationId)
         throw new Error("Gagal mendapatkan ID rekomendasi");
 
-      const recRes = await fetchWithAuth(
-        `https://edupath-backend.vercel.app/api/v1/recommendations/${recommendationId}`,
-      );
+      const recRes = await fetchWithAuth(`${API_URL}/recommendations/${recommendationId}`);
       const recData = await recRes.json();
 
       if (!recData.success)
@@ -160,9 +153,7 @@ function UserProfilePage() {
 
     try {
       // MENGGUNAKAN fetchWithAuth
-      const response = await fetchWithAuth(
-        `https://edupath-backend.vercel.app/api/v1/assessments/${assessmentId}`,
-      );
+      const response = await fetchWithAuth(`${API_URL}/assessments/${assessmentId}`);
       const result = await response.json();
 
       if (result.success) {
@@ -191,7 +182,7 @@ function UserProfilePage() {
     try {
       // MENGGUNAKAN fetchWithAuth (Hanya perlu mengirim method dan body)
       const response = await fetchWithAuth(
-        "https://edupath-backend.vercel.app/api/v1/profiles/me",
+        `${API_URL}/profiles/me`,
         {
           method: "PUT",
           body: JSON.stringify(formData),

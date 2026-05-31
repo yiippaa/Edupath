@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAssessment } from "../context/AssessmentContext";
 import iconLogin from "../assets/login.png";
+import { API_URL } from "../config";
 
 function Login() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function Login() {
 
     try {
       const response = await fetch(
-        "https://edupath-backend.vercel.app/api/v1/auth/login",
+        `${API_URL}/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAssessment } from "../context/AssessmentContext";
 import {
@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { fetchWithAuth } from "../Utils/auth";
+import { API_URL } from "../config";
 import { toPng } from "html-to-image";
 import {
   Document,
@@ -130,9 +131,7 @@ function ResultPage() {
         if (!token) return;
 
         // Pemanggilan API
-        const response = await fetchWithAuth(
-          "https://edupath-backend.vercel.app/api/v1/profiles/me",
-        );
+        const response = await fetchWithAuth(`${API_URL}/profiles/me`);
         const result = await response.json();
 
         if (result.success && result.data) {

@@ -1,4 +1,4 @@
-const API_URL = 'https://edupath-backend.vercel.app/api/v1';
+import { API_URL } from '../config';
 
 // FUNGSI LOGOUT
 export const handleLogout = async (onSuccessCallback) => {
