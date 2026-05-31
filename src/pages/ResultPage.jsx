@@ -792,7 +792,7 @@ function ResultPage() {
             </svg>
             {schoolName}
           </p>
-          <p className="text-slate-600 leading-relaxed text-sm lg:text-base pr-4 lg:pr-24">
+          <p className="text-slate-600 leading-relaxed text-base lg:text-lg pr-4 lg:pr-24">
             {aiSummary}
           </p>
         </div>
@@ -1174,7 +1174,7 @@ function ResultPage() {
                     ></path>
                   </svg>
                 </span>
-                <h3 className="font-bold text-slate-800 text-sm">
+                <h3 className="font-bold text-slate-800 text-base">
                   Detail Analisis AI
                 </h3>
               </div>
@@ -1200,7 +1200,7 @@ function ResultPage() {
                   </svg>
                 </button>
                 {openAccordions.alasan && (
-                  <div className="px-3 pb-3 text-xs text-slate-500 leading-relaxed">
+                  <div className="px-3 pb-3 text-sm text-slate-500 leading-relaxed">
                     {alasanText}
                   </div>
                 )}
