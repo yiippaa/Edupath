@@ -9,6 +9,31 @@ function LandingPage() {
   const [firstName, setFirstName] = useState("");
   const [initials, setInitials] = useState("");
 
+  // Footer Interactive State
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [isFAQOpen, setIsFAQOpen] = useState(false);
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      alert("Harap isi semua kolom.");
+      return;
+    }
+    setContactSubmitted(true);
+    setTimeout(() => {
+      setIsContactOpen(false);
+      setContactSubmitted(false);
+      setContactForm({ name: "", email: "", message: "" });
+      alert("Pesan Anda berhasil dikirim! Terima kasih.");
+    }, 1500);
+  };
+
   // status login setiap kali Landing Page dibuka
   useEffect(() => {
     const token = localStorage.getItem("user_token");
@@ -23,7 +48,7 @@ function LandingPage() {
         setFirstName(
           nameParts.length > 1
             ? `${nameParts[0]} ${nameParts[1]}`
-            : nameParts[0]
+            : nameParts[0],
         );
 
         // Membuat inisial
@@ -72,7 +97,10 @@ function LandingPage() {
       if (element) {
         const headerOffset = 80;
         const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + (window.scrollY || window.pageYOffset) - headerOffset;
+        const offsetPosition =
+          elementPosition +
+          (window.scrollY || window.pageYOffset) -
+          headerOffset;
         scrollToY(offsetPosition, 600);
       }
     }
@@ -233,8 +261,12 @@ function LandingPage() {
                   {initials}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-slate-800 leading-none mb-1">{firstName}</span>
-                  <span className="text-xs text-slate-500 font-medium">Lihat Profil</span>
+                  <span className="font-bold text-slate-800 leading-none mb-1">
+                    {firstName}
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">
+                    Lihat Profil
+                  </span>
                 </div>
                 <svg
                   className="w-5 h-5 text-slate-400 ml-auto"
@@ -432,7 +464,10 @@ function LandingPage() {
         </section>
 
         {/* About Mission Section */}
-        <section className="relative py-16 lg:py-32 bg-primary overflow-hidden">
+        <section
+          id="mission"
+          className="relative py-16 lg:py-32 bg-primary overflow-hidden scroll-mt-20"
+        >
           <div className="absolute inset-0 z-0">
             <img
               alt="Students collaborating"
@@ -481,82 +516,337 @@ function LandingPage() {
       {/* Footer */}
       <footer
         id="footer"
-        className="w-full bg-surface-container-high border-t border-border-subtle transition-opacity duration-200 mt-auto scroll-mt-20"
+        className="w-full bg-slate-900 text-slate-400 border-t border-slate-800/80 transition-opacity duration-200 mt-auto scroll-mt-20 relative overflow-hidden"
       >
-        <div className="max-w-container-max mx-auto px-gutter py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="md:col-span-2 space-y-6">
-              <div className="font-h2 text-h2 text-primary tracking-tight font-bold">
+        {/* Decorative Glow Orb */}
+        <div className="absolute top-0 left-1/4 -translate-y-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div className="max-w-container-max mx-auto px-gutter py-16 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8">
+            <div className="space-y-6 md:col-span-6 lg:col-span-6">
+              <div
+                className="font-h2 text-h2 text-white tracking-tight font-bold hover:text-blue-400 transition-colors duration-300 cursor-pointer"
+                onClick={(e) => handleScrollTo(e, "top")}
+              >
                 EduPath
               </div>
-              <p className="font-body-md text-text-secondary max-w-sm">
-                Platform penasihat akademik profesional berbasis AI yang
-                mengarahkan potensi Anda melalui presisi data yang tak
-                terbantahkan.
+              <p className="font-body-md text-slate-400 text-sm leading-relaxed max-w-md">
+                Platform penasihat akademik berbasis AI yang mendampingi Anda
+                memahami potensi dan pilihan akademik dengan dukungan data.
               </p>
+              {/* Social Media Icons */}
+              <div className="flex gap-3 pt-2">
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-10 h-10 rounded-full bg-slate-800 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/20"
+                  aria-label="GitHub"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-10 h-10 rounded-full bg-slate-800 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/20"
+                  aria-label="LinkedIn"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-10 h-10 rounded-full bg-slate-800 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/20"
+                  aria-label="Twitter"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </a>
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-10 h-10 rounded-full bg-slate-800 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-400 transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/20"
+                  aria-label="Instagram"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </a>
+              </div>
             </div>
-            <div>
-              <h4 className="font-label-md text-text-primary mb-6 uppercase tracking-wider font-bold">
-                Bantuan
+
+            <div className="md:col-span-3 lg:col-span-3">
+              <h4 className="font-label-md text-white mb-6 uppercase tracking-wider font-bold">
+                Eksplorasi
               </h4>
-              <ul className="space-y-4 font-body-md text-text-secondary">
+              <ul className="space-y-4 font-body-md text-slate-400">
                 <li>
-                  <span className="text-text-secondary cursor-default">
-                    FAQ
-                  </span>
+                  <a
+                    href="#"
+                    onClick={(e) => handleScrollTo(e, "top")}
+                    className="hover:text-blue-400 hover:translate-x-1 transition-all duration-300 inline-block cursor-pointer"
+                  >
+                    Tentang Kami
+                  </a>
                 </li>
                 <li>
-                  <span className="text-text-secondary cursor-default">
-                    Contact Support
-                  </span>
+                  <a
+                    href="#features"
+                    onClick={(e) => handleScrollTo(e, "features")}
+                    className="hover:text-blue-400 hover:translate-x-1 transition-all duration-300 inline-block cursor-pointer"
+                  >
+                    Fitur Utama
+                  </a>
                 </li>
                 <li>
-                  <span className="text-text-secondary cursor-default">
-                    Help Center
-                  </span>
+                  <a
+                    href="#mission"
+                    onClick={(e) => handleScrollTo(e, "mission")}
+                    className="hover:text-blue-400 hover:translate-x-1 transition-all duration-300 inline-block cursor-pointer"
+                  >
+                    Misi Kami
+                  </a>
                 </li>
               </ul>
             </div>
-            <div>
-              <h4 className="font-label-md text-text-primary mb-6 uppercase tracking-wider font-bold">
-                Legal
+
+            <div className="md:col-span-3 lg:col-span-3">
+              <h4 className="font-label-md text-white mb-6 uppercase tracking-wider font-bold">
+                Bantuan
               </h4>
-              <ul className="space-y-4 font-body-md text-text-secondary">
+              <ul className="space-y-4 font-body-md text-slate-400">
                 <li>
-                  <span className="text-text-secondary cursor-default">
-                    Privacy Policy
-                  </span>
+                  <button
+                    onClick={() => setIsFAQOpen(true)}
+                    className="hover:text-blue-400 hover:translate-x-1 transition-all duration-300 inline-block cursor-pointer text-left focus:outline-none"
+                  >
+                    FAQ
+                  </button>
                 </li>
                 <li>
-                  <span className="text-text-secondary cursor-default">
-                    Terms of Service
-                  </span>
-                </li>
-                <li>
-                  <span className="text-text-secondary cursor-default">
-                    Cookie Policy
-                  </span>
+                  <button
+                    onClick={() => setIsContactOpen(true)}
+                    className="hover:text-blue-400 hover:translate-x-1 transition-all duration-300 inline-block cursor-pointer text-left focus:outline-none"
+                  >
+                    Hubungi Dukungan
+                  </button>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-16 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4 text-caption text-text-secondary">
+
+          <div className="mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-caption text-slate-500">
             <p>© 2026 EduPath. Professional Academic Advisory Platform.</p>
-            <p className="flex items-center gap-2">
-              <span
-                className="material-symbols-outlined text-[14px]"
-                style={{
-                  fontVariationSettings:
-                    "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24",
-                }}
-              >
-                public
-              </span>{" "}
-              Global Edition
-            </p>
+            <div className="flex items-center gap-6">
+              <p className="flex items-center gap-1.5">
+                <span
+                  className="material-symbols-outlined text-[14px]"
+                  style={{
+                    fontVariationSettings:
+                      "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24",
+                  }}
+                >
+                  public
+                </span>{" "}
+                Global Edition
+              </p>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* FAQ Modal */}
+      {isFAQOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+              <h3 className="font-h2 text-xl font-bold text-slate-800">
+                Tanya Jawab (FAQ)
+              </h3>
+              <button
+                onClick={() => setIsFAQOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="space-y-4 overflow-y-auto pr-1 flex-1">
+              {[
+                {
+                  q: "Bagaimana cara kerja analisis AI EduPath?",
+                  a: "EduPath menggabungkan nilai akademis Anda dengan metrik psikometri minat-bakat melalui model AI Deep Learning kami untuk menghasilkan kecocokan karir dan jurusan terbaik.",
+                },
+                {
+                  q: "Apakah data pribadi saya aman?",
+                  a: "Sangat aman. Seluruh data nilai rapor dan hasil evaluasi Anda dienkripsi penuh di server kami dan tidak akan dibagikan kepada pihak manapun tanpa izin Anda.",
+                },
+                {
+                  q: "Apakah rekomendasi karir ini mutlak?",
+                  a: "Rekomendasi ini dibuat secara ilmiah berdasarkan data akademis dan minat sebagai referensi utama Anda. Keputusan akhir tetap berada pada Anda, orang tua, dan pembimbing.",
+                },
+              ].map((item, idx) => (
+                <div key={idx} className="border-b border-slate-100 pb-4">
+                  <h4 className="font-semibold text-slate-800 mb-2 text-sm flex items-start gap-2">
+                    <span className="bg-blue-50 text-blue-600 rounded px-1.5 py-0.5 text-xs font-bold mt-0.5">
+                      Q
+                    </span>
+                    {item.q}
+                  </h4>
+                  <p className="text-xs text-slate-500 leading-relaxed pl-7">
+                    {item.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setIsFAQOpen(false)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-2.5 rounded-full text-xs transition cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Support Modal */}
+      {isContactOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 flex flex-col">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+              <h3 className="font-h2 text-xl font-bold text-slate-800">
+                Hubungi Dukungan
+              </h3>
+              <button
+                onClick={() => setIsContactOpen(false)}
+                className="text-slate-400 hover:text-slate-600 transition cursor-pointer"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {contactSubmitted ? (
+              <div className="py-8 text-center space-y-4">
+                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto text-green-500">
+                  <span className="material-symbols-outlined text-4xl">
+                    check_circle
+                  </span>
+                </div>
+                <h4 className="font-bold text-slate-800 text-lg">
+                  Pesan Dikirim!
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                  Terima kasih telah menghubungi kami. Tim dukungan EduPath akan
+                  merespons pesan Anda dalam waktu 1-2 hari kerja.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    Nama Lengkap
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={contactForm.name}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, name: e.target.value })
+                    }
+                    placeholder="Masukkan nama Anda"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    Alamat Email
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={contactForm.email}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, email: e.target.value })
+                    }
+                    placeholder="nama@email.com"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    Pesan Anda
+                  </label>
+                  <textarea
+                    required
+                    rows="4"
+                    value={contactForm.message}
+                    onChange={(e) =>
+                      setContactForm({
+                        ...contactForm,
+                        message: e.target.value,
+                      })
+                    }
+                    placeholder="Tuliskan kendala atau pertanyaan Anda di sini..."
+                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                  ></textarea>
+                </div>
+                <div className="flex gap-3 justify-end pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsContactOpen(false)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-full text-xs transition cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-full text-xs transition cursor-pointer"
+                  >
+                    Kirim Pesan
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
