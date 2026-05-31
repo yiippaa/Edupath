@@ -351,7 +351,7 @@ function LandingPage() {
               memilih masa depan dengan memberikan rekomendasi berbasis data
               yang tenang dan dapat diandalkan.
             </p>
-            <div className="pt-4 flex flex-wrap gap-4">
+            <div className="pt-4 flex justify-center lg:justify-start flex-wrap gap-4">
               {isLoggedIn ? (
                 <button
                   onClick={() => navigate("/onboarding")}

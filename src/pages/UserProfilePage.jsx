@@ -86,7 +86,9 @@ function UserProfilePage() {
     setLoadingText("Memuat Detail Hasil...");
     setIsLoading(true);
     try {
-      const assRes = await fetchWithAuth(`${API_URL}/assessments/${item.assessment_id}`);
+      const assRes = await fetchWithAuth(
+        `${API_URL}/assessments/${item.assessment_id}`,
+      );
       const assData = await assRes.json();
 
       if (!assData.success) throw new Error("Gagal mengambil detail asesmen");
@@ -110,7 +112,9 @@ function UserProfilePage() {
       if (!recommendationId)
         throw new Error("Gagal mendapatkan ID rekomendasi");
 
-      const recRes = await fetchWithAuth(`${API_URL}/recommendations/${recommendationId}`);
+      const recRes = await fetchWithAuth(
+        `${API_URL}/recommendations/${recommendationId}`,
+      );
       const recData = await recRes.json();
 
       if (!recData.success)
@@ -153,7 +157,9 @@ function UserProfilePage() {
 
     try {
       // MENGGUNAKAN fetchWithAuth
-      const response = await fetchWithAuth(`${API_URL}/assessments/${assessmentId}`);
+      const response = await fetchWithAuth(
+        `${API_URL}/assessments/${assessmentId}`,
+      );
       const result = await response.json();
 
       if (result.success) {
@@ -181,13 +187,10 @@ function UserProfilePage() {
 
     try {
       // MENGGUNAKAN fetchWithAuth (Hanya perlu mengirim method dan body)
-      const response = await fetchWithAuth(
-        `${API_URL}/profiles/me`,
-        {
-          method: "PUT",
-          body: JSON.stringify(formData),
-        },
-      );
+      const response = await fetchWithAuth(`${API_URL}/profiles/me`, {
+        method: "PUT",
+        body: JSON.stringify(formData),
+      });
       const result = await response.json();
 
       if (!result.success) {
@@ -813,7 +816,7 @@ function UserProfilePage() {
                     <div>
                       <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center border-b border-slate-100 pb-2">
                         <svg
-                          className="w-4 h-4 mr-1.5 text-indigo-500"
+                          className="w-4 h-4 mr-1.5 text-blue-500"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
