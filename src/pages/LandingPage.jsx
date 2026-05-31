@@ -5,6 +5,7 @@ import LandingPageIlustration from "../assets/ilustration1.png";
 function LandingPage() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [initials, setInitials] = useState("");
 
@@ -38,10 +39,49 @@ function LandingPage() {
     }
   }, []);
 
+  const scrollToY = (to, duration = 600) => {
+    const start = window.scrollY || window.pageYOffset;
+    const change = to - start;
+    const increment = 20;
+    let currentTime = 0;
+
+    const easeInOutQuad = (t, b, c, d) => {
+      t /= d / 2;
+      if (t < 1) return (c / 2) * t * t + b;
+      t--;
+      return (-c / 2) * (t * (t - 2) - 1) + b;
+    };
+
+    const animateScroll = () => {
+      currentTime += increment;
+      const val = easeInOutQuad(currentTime, start, change, duration);
+      window.scrollTo(0, val);
+      if (currentTime < duration) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+    animateScroll();
+  };
+
+  const handleScrollTo = (e, targetId) => {
+    e.preventDefault();
+    if (targetId === "top") {
+      scrollToY(0, 600);
+    } else {
+      const element = document.getElementById(targetId);
+      if (element) {
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + (window.scrollY || window.pageYOffset) - headerOffset;
+        scrollToY(offsetPosition, 600);
+      }
+    }
+  };
+
   return (
     <div className="bg-surface-background text-on-surface antialiased pt-[80px] min-h-screen flex flex-col font-sans">
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md transition-all duration-300 ease-in-out">
+      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md transition-all duration-300 ease-in-out border-b border-slate-100">
         <div className="flex justify-between items-center px-gutter py-4 max-w-container-max mx-auto">
           <div className="flex justify-between gap-10">
             <div className="font-h2 text-h2 text-primary tracking-tight font-bold">
@@ -51,63 +91,190 @@ function LandingPage() {
               <a
                 className="text-text-secondary dark:text-on-surface-variant hover:text-primary transition-colors"
                 href="#"
+                onClick={(e) => handleScrollTo(e, "top")}
               >
                 About
               </a>
               <a
                 className="text-text-secondary dark:text-on-surface-variant hover:text-primary transition-colors"
                 href="#features"
+                onClick={(e) => handleScrollTo(e, "features")}
               >
                 How it Works
               </a>
               <a
                 className="text-text-secondary dark:text-on-surface-variant hover:text-primary transition-colors"
                 href="#footer"
+                onClick={(e) => handleScrollTo(e, "footer")}
               >
                 Contact
               </a>
             </nav>
           </div>
 
-          <div className="flex items-center">
-            {isLoggedIn ? (
-              <button
-                onClick={() => navigate("/profile")}
-                className="flex items-center gap-3 hover:bg-slate-200 p-1.5 lg:pl-4 rounded-full transition group"
+          <div className="flex items-center gap-4">
+            {/* Desktop-only Profile/Login buttons */}
+            <div className="hidden md:flex items-center">
+              {isLoggedIn ? (
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="flex items-center gap-3 hover:bg-slate-200 p-1.5 lg:pl-4 rounded-full transition group"
+                >
+                  <span className="font-bold text-slate-700 hidden md:block">
+                    {firstName}
+                  </span>
+                  <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md group-hover:shadow-lg transition">
+                    {initials}
+                  </div>
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate("/login")}
+                  className="flex items-center gap-2 hover:bg-slate-200 p-2 rounded-full transition text-slate-600 font-medium"
+                  title="Log In"
+                >
+                  <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-slate-400">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      ></path>
+                    </svg>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Hamburger Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-slate-600 hover:text-primary hover:bg-slate-100 rounded-full transition cursor-pointer"
+              title="Menu"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <span className="font-bold text-slate-700 hidden md:block">
-                  {firstName}
-                </span>
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md group-hover:shadow-lg transition">
-                  {initials}
-                </div>
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate("/login")}
-                className="flex items-center gap-2 hover:bg-slate-200 p-2 rounded-full transition text-slate-600 font-medium"
-                title="Log In"
-              >
-                <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-slate-400">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    ></path>
-                  </svg>
-                </div>
-              </button>
-            )}
+                {isMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  ></path>
+                )}
+              </svg>
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile Menu Dropdown */}
+      {isMenuOpen && (
+        <div className="md:hidden fixed top-[72px] left-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 py-6 px-6 z-40 shadow-lg animate-fadeIn flex flex-col space-y-4 font-body-md font-semibold">
+          <a
+            onClick={(e) => {
+              handleScrollTo(e, "top");
+              setIsMenuOpen(false);
+            }}
+            className="text-slate-600 hover:text-primary transition-colors py-2 border-b border-slate-100"
+            href="#"
+          >
+            About
+          </a>
+          <a
+            onClick={(e) => {
+              handleScrollTo(e, "features");
+              setIsMenuOpen(false);
+            }}
+            className="text-slate-600 hover:text-primary transition-colors py-2 border-b border-slate-100"
+            href="#features"
+          >
+            How it Works
+          </a>
+          <a
+            onClick={(e) => {
+              handleScrollTo(e, "footer");
+              setIsMenuOpen(false);
+            }}
+            className="text-slate-600 hover:text-primary transition-colors py-2 border-b border-slate-100"
+            href="#footer"
+          >
+            Contact
+          </a>
+
+          {/* Mobile Profile / Auth Buttons Section */}
+          {isLoggedIn ? (
+            <div className="pt-2">
+              <button
+                onClick={() => {
+                  navigate("/profile");
+                  setIsMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 py-2 px-3 hover:bg-slate-100 rounded-xl transition text-left cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shrink-0">
+                  {initials}
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-slate-800 leading-none mb-1">{firstName}</span>
+                  <span className="text-xs text-slate-500 font-medium">Lihat Profil</span>
+                </div>
+                <svg
+                  className="w-5 h-5 text-slate-400 ml-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  navigate("/login");
+                  setIsMenuOpen(false);
+                }}
+                className="w-full text-center bg-primary hover:bg-primary-container text-on-primary font-bold py-3 rounded-xl transition cursor-pointer"
+              >
+                Log In
+              </button>
+              <button
+                onClick={() => {
+                  navigate("/register");
+                  setIsMenuOpen(false);
+                }}
+                className="w-full text-center bg-surface-white text-primary border-2 border-primary font-bold py-3 rounded-xl transition hover:bg-slate-50 cursor-pointer"
+              >
+                Register
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -171,7 +338,7 @@ function LandingPage() {
         {/* Features Z-Pattern Section */}
         <section
           id="features"
-          className="bg-surface-container-low py-12 lg:py-24"
+          className="bg-surface-container-low py-12 lg:py-24 scroll-mt-20"
         >
           <div className="max-w-container-max mx-auto px-gutter">
             <div className="text-center max-w-2xl mx-auto mb-20">
@@ -314,7 +481,7 @@ function LandingPage() {
       {/* Footer */}
       <footer
         id="footer"
-        className="w-full bg-surface-container-high border-t border-border-subtle transition-opacity duration-200 mt-auto"
+        className="w-full bg-surface-container-high border-t border-border-subtle transition-opacity duration-200 mt-auto scroll-mt-20"
       >
         <div className="max-w-container-max mx-auto px-gutter py-16">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
