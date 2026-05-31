@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAssessment } from "../context/AssessmentContext";
 import {
@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { fetchWithAuth } from "../Utils/auth";
+import { API_URL } from "../config";
 import { toPng } from "html-to-image";
 import {
   Document,
@@ -130,9 +131,7 @@ function ResultPage() {
         if (!token) return;
 
         // Pemanggilan API
-        const response = await fetchWithAuth(
-          "https://edupath-backend.vercel.app/api/v1/profiles/me",
-        );
+        const response = await fetchWithAuth(`${API_URL}/profiles/me`);
         const result = await response.json();
 
         if (result.success && result.data) {
@@ -243,7 +242,7 @@ function ResultPage() {
     try {
       let chartImage = null;
       const ghostChartElement = document.getElementById("pdf-ghost-chart");
-      
+
       if (ghostChartElement) {
         // Gunakan html-to-image untuk menangkap elemen ghost chart (kualitas desktop)
         chartImage = await toPng(ghostChartElement, {
@@ -638,9 +637,15 @@ function ResultPage() {
                   )}
                   wrap={false}
                 >
-                  <Text style={tw("text-amber-800 text-[9.5px] leading-relaxed flex-1")}>
+                  <Text
+                    style={tw(
+                      "text-amber-800 text-[9.5px] leading-relaxed flex-1",
+                    )}
+                  >
                     <Text style={tw("font-bold")}>Pemberitahuan: </Text>
-                    Rekomendasi ini dibuat berdasarkan data akademik dan dapat digunakan sebagai referensi. Keputusan akhir tetap berada pada pengguna, orang tua, atau pihak pembimbing.
+                    Rekomendasi ini dibuat berdasarkan data akademik dan dapat
+                    digunakan sebagai referensi. Keputusan akhir tetap berada
+                    pada pengguna, orang tua, atau pihak pembimbing.
                   </Text>
                 </View>
               </View>
@@ -717,8 +722,23 @@ function ResultPage() {
       {/* ========================================================= */}
       {/* GHOST CHART KHUSUS UNTUK PDF (Selalu berukuran Desktop) */}
       {/* ========================================================= */}
-      <div style={{ position: "absolute", top: "-9999px", left: "-9999px", opacity: 0 }}>
-        <div id="pdf-ghost-chart" style={{ width: "600px", height: "450px", background: "white", padding: "20px" }}>
+      <div
+        style={{
+          position: "absolute",
+          top: "-9999px",
+          left: "-9999px",
+          opacity: 0,
+        }}
+      >
+        <div
+          id="pdf-ghost-chart"
+          style={{
+            width: "600px",
+            height: "450px",
+            background: "white",
+            padding: "20px",
+          }}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
               <PolarGrid stroke="#e2e8f0" />
@@ -726,7 +746,12 @@ function ResultPage() {
                 dataKey="subject"
                 tick={{ fill: "#475569", fontSize: 13, fontWeight: 600 }}
               />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+              <PolarRadiusAxis
+                angle={30}
+                domain={[0, 100]}
+                tick={false}
+                axisLine={false}
+              />
               <Radar
                 name="Skor"
                 dataKey="A"
@@ -924,7 +949,7 @@ function ResultPage() {
                         </span>
 
                         {/* Lencana Kesesuaian */}
-                        <span className="text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full bg-green-100 text-green-700 text-center border border-green-200">
+                        <span className="text-xs sm:text-sm font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700 text-center border border-green-200">
                           {getMatchText(confidencePercent)}
                         </span>
                       </div>
@@ -933,13 +958,13 @@ function ResultPage() {
                         {careerName}
                       </h3>
 
-                      <p className="text-xs text-slate-500 mb-5 line-clamp-3 leading-relaxed flex-grow">
+                      <p className="text-xs sm:text-sm text-slate-600 mb-5 line-clamp-3 leading-relaxed flex-grow">
                         {careerDesc}
                       </p>
 
                       {majorsList.length > 0 && (
                         <div className="mt-auto p-4 bg-gradient-to-br from-blue-50/80 to-indigo-50/80 rounded-xl border border-blue-100/60 flex-grow-0">
-                          <p className="text-xs font-bold text-blue-800 mb-2.5 flex items-center uppercase tracking-wider">
+                          <p className="text-xs sm:text-sm font-bold text-blue-800 mb-2.5 flex items-center uppercase tracking-wider">
                             <svg
                               className="w-4 h-4 mr-1.5 opacity-80"
                               fill="none"
@@ -1008,7 +1033,7 @@ function ResultPage() {
                               <div className="flex flex-col md:flex-row md:items-center gap-1.5 md:gap-2 mb-2.5">
                                 {/* Kiri (Desktop) / Atas (Mobile): Nomor Peringkat & Nama Karir */}
                                 <div className="flex items-center gap-2">
-                                  <span className="text-slate-400 font-bold text-xs bg-white border border-slate-200 px-1.5 py-0.5 rounded">
+                                  <span className="text-slate-500 font-bold text-xs bg-white border border-slate-200 px-1.5 py-0.5 rounded">
                                     #{index + 3}
                                   </span>
                                   <h4 className="font-bold text-slate-700 text-sm">
@@ -1018,14 +1043,14 @@ function ResultPage() {
 
                                 {/* Kanan (Desktop) / Bawah (Mobile): Tulisan Rekomendasi */}
                                 <div className="mt-0.5 md:mt-0">
-                                  <span className="inline-block text-[10px] font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full text-center">
+                                  <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full text-center">
                                     {getMatchText(confidencePercent)}
                                   </span>
                                 </div>
                               </div>
 
                               {/* Deskripsi Karir */}
-                              <p className="text-xs text-slate-500 leading-relaxed pr-2">
+                              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pr-2">
                                 {careerDesc}
                               </p>
                             </div>
@@ -1033,7 +1058,7 @@ function ResultPage() {
                             {/* Bagian Jurusan Terkait yang Diperbarui (Peringkat 3+) */}
                             {majorsList.length > 0 && (
                               <div className="md:min-w-[220px] border-t border-slate-200 md:border-t-0 pt-3 md:pt-0 mt-2 md:mt-0 md:pl-5 md:border-l border-slate-200">
-                                <p className="text-[10px] font-bold text-slate-500 mb-2.5 flex items-center uppercase tracking-wider">
+                                <p className="text-xs font-bold text-slate-500 mb-2.5 flex items-center uppercase tracking-wider">
                                   <svg
                                     className="w-4 h-4 mr-1.5 opacity-80"
                                     fill="none"
@@ -1065,7 +1090,7 @@ function ResultPage() {
                                   {majorsList.map((major, i) => (
                                     <span
                                       key={i}
-                                      className="bg-slate-100 text-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-md border border-slate-200 shadow-sm hover:bg-white transition-colors"
+                                      className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-slate-200 shadow-sm hover:bg-white transition-colors"
                                     >
                                       {major?.major_name}
                                     </span>
@@ -1119,7 +1144,10 @@ function ResultPage() {
                   />
                 </svg>
                 <div className="text-xs text-amber-800 leading-relaxed text-left">
-                  <span className="font-bold">Pemberitahuan:</span> Rekomendasi ini dibuat berdasarkan data akademik dan dapat digunakan sebagai referensi. Keputusan akhir tetap berada pada pengguna, orang tua, atau pihak pembimbing.
+                  <span className="font-bold">Pemberitahuan:</span> Rekomendasi
+                  ini dibuat berdasarkan data akademik dan dapat digunakan
+                  sebagai referensi. Keputusan akhir tetap berada pada pengguna,
+                  orang tua, atau pihak pembimbing.
                 </div>
               </div>
             </div>
@@ -1129,7 +1157,7 @@ function ResultPage() {
             {/* BOX STATISTIK */}
             <div className="grid grid-cols-3 gap-3 text-nowrap">
               <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-full flex flex-col justify-center items-center min-h-[110px]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
                   AVG SCIENCE
                 </p>
                 <p className="text-3xl font-bold text-slate-800 leading-none mt-2">
@@ -1138,7 +1166,7 @@ function ResultPage() {
               </div>
 
               <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-full flex flex-col justify-center items-center min-h-[110px]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
                   AVG SOCIAL
                 </p>
                 <p className="text-3xl font-bold text-slate-800 leading-none mt-2">
@@ -1147,7 +1175,7 @@ function ResultPage() {
               </div>
 
               <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-full flex flex-col justify-center items-center min-h-[110px]">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
                   TOTAL SCORE
                 </p>
                 <p className="text-3xl font-bold text-blue-600 leading-none mt-2">
@@ -1225,7 +1253,7 @@ function ResultPage() {
                   </svg>
                 </button>
                 {openAccordions.kekuatan && (
-                  <div className="px-3 pb-3 text-xs text-slate-500 leading-relaxed">
+                  <div className="px-3 pb-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {kekuatanText}
                   </div>
                 )}
@@ -1250,7 +1278,7 @@ function ResultPage() {
                   </svg>
                 </button>
                 {openAccordions.saran && (
-                  <div className="px-3 pb-3 text-xs text-slate-500 leading-relaxed">
+                  <div className="px-3 pb-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {saranText}
                   </div>
                 )}
@@ -1279,37 +1307,37 @@ function ResultPage() {
               </h3>
               <div className="space-y-3.5 text-xs">
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">
+                  <span className="text-slate-500 font-medium">
                     Jam Belajar Mandiri
                   </span>
-                  <span className="font-bold text-slate-700">
+                  <span className="font-bold text-slate-800">
                     {behavioralData?.weekly_self_study_hours ?? 0} jam / minggu
                   </span>
                 </div>
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-400 font-medium">
+                  <span className="text-slate-500 font-medium">
                     Absensi / Tidak Hadir
                   </span>
-                  <span className="font-bold text-slate-700">
+                  <span className="font-bold text-slate-800">
                     {behavioralData?.absence_days ?? 0} hari
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-1">
-                  <span className="text-slate-400 font-medium">
+                  <span className="text-slate-500 font-medium">
                     Aktif Ekstrakurikuler
                   </span>
                   <span
-                    className={`font-bold ${behavioralData?.extracurricular ? "text-green-600" : "text-slate-500"}`}
+                    className={`font-bold ${behavioralData?.extracurricular ? "text-green-600" : "text-slate-600"}`}
                   >
                     {behavioralData?.extracurricular ? "Ya (Aktif)" : "Tidak"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-1">
-                  <span className="text-slate-400 font-medium">
+                  <span className="text-slate-500 font-medium">
                     Pekerjaan Paruh Waktu
                   </span>
                   <span
-                    className={`font-bold ${isTrue(behavioralData?.part_time_job) ? "text-blue-600" : "text-slate-500"}`}
+                    className={`font-bold ${isTrue(behavioralData?.part_time_job) ? "text-blue-600" : "text-slate-600"}`}
                   >
                     {isTrue(behavioralData?.part_time_job) ? "Ya" : "Tidak"}
                   </span>
@@ -1358,7 +1386,7 @@ function ResultPage() {
                           ref?.title || "Referensi"
                         )}
                       </h4>
-                      <p className="text-[10px] text-slate-500 leading-relaxed">
+                      <p className="text-xs text-slate-600 leading-relaxed">
                         {ref?.keterangan || ""}
                       </p>
                     </div>
@@ -1373,7 +1401,7 @@ function ResultPage() {
 
             {/* ACTION BUTTONS */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 print:hidden">
-              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                 Tindakan Cepat
               </h3>
               <div className="space-y-2.5">

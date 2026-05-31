@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAssessment } from "../context/AssessmentContext";
 import { fetchWithAuth } from "../Utils/auth";
+import { API_URL } from "../config";
 
 function PsychometricForm() {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ function PsychometricForm() {
     console.log("Data siap dikirim ke backend:", payload);
 
     try {
-      const API_URL = "https://edupath-backend.vercel.app/api/v1";
+
 
       // 1. Submit Assessment (MENGGUNAKAN fetchWithAuth)
       setProgress(30);
