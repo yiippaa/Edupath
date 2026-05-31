@@ -1253,7 +1253,7 @@ function ResultPage() {
                   </svg>
                 </button>
                 {openAccordions.kekuatan && (
-                  <div className="px-3 pb-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  <div className="px-3 pb-3 text-sm sm:text-sm text-slate-600 leading-relaxed">
                     {kekuatanText}
                   </div>
                 )}
@@ -1278,7 +1278,7 @@ function ResultPage() {
                   </svg>
                 </button>
                 {openAccordions.saran && (
-                  <div className="px-3 pb-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  <div className="px-3 pb-3 text-sm sm:text-sm text-slate-600 leading-relaxed">
                     {saranText}
                   </div>
                 )}
@@ -1287,7 +1287,7 @@ function ResultPage() {
 
             {/* PROFIL BELAJAR */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-              <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center">
+              <h3 className="font-bold text-slate-800 text-base mb-4 flex items-center">
                 <span className="text-blue-500 mr-2 flex items-center">
                   <svg
                     className="w-5 h-5"
@@ -1307,37 +1307,37 @@ function ResultPage() {
               </h3>
               <div className="space-y-3.5 text-xs">
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-500 font-medium">
+                  <span className="text-sm text-slate-500 font-medium">
                     Jam Belajar Mandiri
                   </span>
-                  <span className="font-bold text-slate-800">
+                  <span className="text-sm font-bold text-slate-800">
                     {behavioralData?.weekly_self_study_hours ?? 0} jam / minggu
                   </span>
                 </div>
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-slate-500 font-medium">
+                  <span className="text-sm text-slate-500 font-medium">
                     Absensi / Tidak Hadir
                   </span>
-                  <span className="font-bold text-slate-800">
+                  <span className="text-sm font-bold text-slate-800">
                     {behavioralData?.absence_days ?? 0} hari
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-1">
-                  <span className="text-slate-500 font-medium">
+                  <span className="text-sm text-slate-500 font-medium">
                     Aktif Ekstrakurikuler
                   </span>
                   <span
-                    className={`font-bold ${behavioralData?.extracurricular ? "text-green-600" : "text-slate-600"}`}
+                    className={`text-sm font-bold ${behavioralData?.extracurricular ? "text-green-600" : "text-slate-600"}`}
                   >
                     {behavioralData?.extracurricular ? "Ya (Aktif)" : "Tidak"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-1">
-                  <span className="text-slate-500 font-medium">
+                  <span className="text-sm text-slate-500 font-medium">
                     Pekerjaan Paruh Waktu
                   </span>
                   <span
-                    className={`font-bold ${isTrue(behavioralData?.part_time_job) ? "text-blue-600" : "text-slate-600"}`}
+                    className={`text-sm font-bold ${isTrue(behavioralData?.part_time_job) ? "text-blue-600" : "text-slate-600"}`}
                   >
                     {isTrue(behavioralData?.part_time_job) ? "Ya" : "Tidak"}
                   </span>
@@ -1347,7 +1347,7 @@ function ResultPage() {
 
             {/* REFERENSI AKADEMIK */}
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
-              <h3 className="font-bold text-slate-800 text-sm mb-4 flex items-center">
+              <h3 className="font-bold text-slate-800 text-base mb-4 flex items-center">
                 <span className="text-blue-500 mr-2 flex items-center">
                   <svg
                     className="w-5 h-5"
@@ -1386,7 +1386,7 @@ function ResultPage() {
                           ref?.title || "Referensi"
                         )}
                       </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-sm text-slate-600 leading-relaxed">
                         {ref?.keterangan || ""}
                       </p>
                     </div>
