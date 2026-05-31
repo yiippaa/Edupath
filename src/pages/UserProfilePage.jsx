@@ -29,6 +29,7 @@ function UserProfilePage() {
 
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const fetchUserProfile = async () => {
     setLoadingText("Memuat Profile...");
@@ -231,6 +232,7 @@ function UserProfilePage() {
   };
 
   const handleLogoutClick = () => {
+    setIsLoggingOut(true);
     backendLogout(() => {
       clearAssessmentSession();
       navigate("/");
@@ -267,6 +269,19 @@ function UserProfilePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 pb-12">
+      {/* OVERLAY LOADING FULL SCREEN FOR LOGOUT */}
+      {isLoggingOut && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-md animate-fadeIn">
+          <div className="w-14 h-14 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-5 shadow-lg"></div>
+          <h2 className="text-2xl font-extrabold text-slate-800 mb-1 tracking-tight">
+            Sedang Keluar...
+          </h2>
+          <p className="text-slate-500 font-medium">
+            Menghapus sesi otentikasi Anda
+          </p>
+        </div>
+      )}
+
       {/* HEADER UTAMA */}
       <header className="sticky top-0 w-full z-50 bg-white/80 backdrop-blur-md transition-all duration-300 ease-in-out border-b border-slate-200">
         <div className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
